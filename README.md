@@ -1,4 +1,5 @@
 # DeprecationCollector
+[![Gem Version](https://badge.fury.io/rb/deprecation_collector.svg)](https://badge.fury.io/rb/deprecation_collector)
 
 Collects ruby and rails deprecation warnings.
 (gem is a work-in-process, documentation will come later)
