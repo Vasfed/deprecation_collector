@@ -10,13 +10,25 @@ Install the gem and add to the application's Gemfile by executing:
 
     $ bundle add deprecation_collector
 
-If bundler is not being used to manage dependencies, install the gem by executing:
-
-    $ gem install deprecation_collector
-
 ## Usage
 
+Add an initializer with condiguration, like
 
+```ruby
+  Rails.application.config.to_prepare do
+    DeprecationCollector.install do |instance|
+      instance.app_revision = ::GIT_REVISION
+      instance.count = false
+      instance.save_full_backtrace = true
+      instance.raise_on_deprecation = false
+      instance.write_interval = (::Rails.env.production? && 15.minutes) || 1.minute
+      instance.exclude_realms = %i[kernel] if Rails.env.production?
+      instance.ignored_messages = [
+        "Ignoring db/schema_cache.yml because it has expired"
+      ]
+    end
+  end
+```
 
 ## Development
 

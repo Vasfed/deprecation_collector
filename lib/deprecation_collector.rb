@@ -5,9 +5,6 @@ require 'time'
 require 'redis'
 
 class DeprecationCollector
-  # NB: in production with hugreds of workers may easily overload redis with writes, so more delay needed:
-  FLUSH_INTERVAL = (::Rails.env.production? && 15.minutes) || 1.minute
-
   @instance_mutex = Mutex.new
   @installed = false
   private_class_method :new
@@ -206,18 +203,21 @@ class DeprecationCollector
     @deprecations = {}
     @known_digests = Set.new
     @last_write_time = current_time
+    @enabled = true
 
-    # default config:
+    load_default_config
+    fetch_known_digests # prevent fresh process from wiring frequent already known messages
+  end
+
+  def load_default_config
     @count = false
     @raise_on_deprecation = false
     @exclude_realms = []
-    @write_interval = FLUSH_INTERVAL
-    @write_interval_jitter = 60
-    @enabled = true
     @ignore_message_regexp = nil
-    @app_root = defined?(Rails) && Rails.root.present? || Dir.pwd
-
-    fetch_known_digests # prevent fresh process from wiring frequent already known messages
+    @app_root = defined?(Rails) && Rails.root.present? && Rails.root || Dir.pwd
+    # NB: in production with hugreds of workers may easily overload redis with writes, so more delay needed:
+    @write_interval = 900 # 15.minutes
+    @write_interval_jitter = 60
   end
 
   def ignored_messages=(val)
@@ -243,7 +243,7 @@ class DeprecationCollector
 
     write_to_redis if current_time - @last_write_time > (@write_interval + rand(@write_interval_jitter))
 
-    $stderr.puts(message) if Rails.env.development? # rubocop:disable Style/StderrPuts
+    $stderr.puts(message) if defined?(Rails) && Rails.env.development? # rubocop:disable Style/StderrPuts
   end
 
   def unsent_data?
