@@ -11,6 +11,7 @@ RSpec.describe DeprecationCollector do
   before(:all) do
     $redis = Redis.new
     DeprecationCollector.install do |instance|
+      instance.redis = $redis
       instance.app_revision = "somerevisionabc123"
       instance.app_root = File.expand_path('..', __dir__)
       instance.count = false
@@ -39,7 +40,7 @@ RSpec.describe DeprecationCollector do
       2.times { collector.collect(message, backtrace) }
       expect(collector.read_each.to_a).to be_empty
 
-      Timecop.travel(10.minutes.from_now) do
+      Timecop.travel(20.minutes.from_now) do
         # тут оно сбросит в редиску
         expect { collector.collect(message, backtrace) }.to change(collector, :unsent_data?).from(true).to(false)
 

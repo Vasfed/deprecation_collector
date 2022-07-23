@@ -12,9 +12,13 @@ class DeprecationCollector
   def self.instance
     return @instance if defined?(@instance) && @instance
 
+    create_instance
+  end
+
+  def self.create_instance
     @instance_mutex.synchronize do
       # переиспользовать мутекс не обязательно, но он используется ровно один раз
-      @instance ||= new($redis, mutex: @instance_mutex)
+      @instance ||= new(mutex: @instance_mutex)
     end
     @instance
   end
@@ -25,7 +29,7 @@ class DeprecationCollector
 
   # inside dev env may be called multiple times
   def self.install
-    instance # to make it created, configuration comes later
+    create_instance # to make it created, configuration comes later
 
     @instance_mutex.synchronize do
       unless @installed
@@ -34,6 +38,7 @@ class DeprecationCollector
       end
 
       yield instance if block_given?
+      instance.fetch_known_digests
 
       # TODO: a more polite hook
       ActiveSupport::Deprecation.behavior = lambda do |message, callstack, deprecation_horizon, gem_name|
@@ -195,9 +200,9 @@ class DeprecationCollector
                 :exclude_realms,
                 :write_interval, :write_interval_jitter,
                 :app_revision, :app_root
+  attr_writer :redis
 
-  def initialize(redis, mutex: nil)
-    @redis = redis
+  def initialize(mutex: nil)
     # on cruby hash itself is threadsafe, but we need to prevent races
     @deprecations_mutex = mutex || Mutex.new
     @deprecations = {}
@@ -206,10 +211,10 @@ class DeprecationCollector
     @enabled = true
 
     load_default_config
-    fetch_known_digests # prevent fresh process from wiring frequent already known messages
   end
 
   def load_default_config
+    @redis = defined?($redis) && $redis
     @count = false
     @raise_on_deprecation = false
     @exclude_realms = []
@@ -254,6 +259,15 @@ class DeprecationCollector
     @count
   end
 
+  def redis
+    raise "DeprecationCollector#redis is not set" unless @redis
+    # TODO: connection pool support (like in sidekiq)
+    return @redis.call if @redis.respond_to?(:call)
+
+    @redis
+  end
+
+  # prevent fresh process from wiring frequent already known messages
   def fetch_known_digests
     @known_digests.merge(@redis.hkeys('deprecations:data'))
   end

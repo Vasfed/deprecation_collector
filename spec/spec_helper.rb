@@ -5,6 +5,8 @@ require 'timecop'
 require "active_support"
 require "deprecation_collector"
 
+ENV['RAILS_ENV'] = 'test'
+
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
   config.example_status_persistence_file_path = ".rspec_status"

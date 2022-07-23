@@ -8,13 +8,16 @@ Collects ruby and rails deprecation warnings.
 
 Install the gem and add to the application's Gemfile by executing:
 
-    $ bundle add deprecation_collector
+```sh
+bundle add deprecation_collector
+```
 
 ## Usage
 
-Add an initializer with condiguration, like
+Add an initializer with configuration, like
 
 ```ruby
+  DeprecationCollector.create_instance(redis: your_redis_connection)
   Rails.application.config.to_prepare do
     DeprecationCollector.install do |instance|
       instance.app_revision = ::GIT_REVISION
