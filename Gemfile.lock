@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    deprecation_collector (0.0.1)
+    deprecation_collector (0.0.2)
       redis (>= 2.0)
 
 GEM
