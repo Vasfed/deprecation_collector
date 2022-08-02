@@ -11,6 +11,10 @@ gem "rspec", "~> 3.0"
 gem "timecop"
 
 gem "rubocop", "~> 1.21"
+gem "rubocop-performance"
+gem "rubocop-rails"
+gem "rubocop-rake"
+gem "rubocop-rspec"
 
 # TODO: appraisals
-gem "rails", '6.0'
+gem "rails", "6.0"

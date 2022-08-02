@@ -1,19 +1,19 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
+require "spec_helper"
 
 RSpec.describe DeprecationCollector do
   subject(:collector) { described_class.instance }
 
   let(:message) { "some message" }
   let(:backtrace) { caller }
+  let(:redis) { described_class.instance.redis }
 
   before(:all) do
-    $redis = Redis.new
     DeprecationCollector.install do |instance|
-      instance.redis = $redis
+      instance.redis = Redis.new
       instance.app_revision = "somerevisionabc123"
-      instance.app_root = File.expand_path('..', __dir__)
+      instance.app_root = File.expand_path("..", __dir__)
       instance.count = false
       instance.save_full_backtrace = true
     end
@@ -34,7 +34,7 @@ RSpec.describe DeprecationCollector do
     end
 
     it "writing and reading redis" do
-      allow($redis).to receive(:hincrby).and_call_original
+      allow(redis).to receive(:hincrby).and_call_original
 
       expect { collector.collect(message, backtrace) }.to change(collector, :unsent_data?).from(false).to(true)
       2.times { collector.collect(message, backtrace) }
@@ -51,9 +51,9 @@ RSpec.describe DeprecationCollector do
       end
 
       if collector.count?
-        expect($redis).to have_received(:hincrby).once
+        expect(redis).to have_received(:hincrby).once
       else
-        expect($redis).not_to have_received(:hincrby)
+        expect(redis).not_to have_received(:hincrby)
       end
 
       data = collector.read_each.to_a
@@ -135,7 +135,7 @@ RSpec.describe DeprecationCollector do
     end
 
     it "is able to ignore by pattern" do
-      collector.ignored_messages = ['ignored', /foo+/]
+      collector.ignored_messages = ["ignored", /foo+/]
       expect do
         warn "ignored warning"
         warn "some fooooo"
@@ -158,29 +158,29 @@ RSpec.describe DeprecationCollector do
 
     it "ignores temporary views method names" do
       expect(digest[
-        'Rails 6.1 will return Content-Type header without modification. '\
-        'If you want just the MIME type, please use `#media_type` instead. '\
-        '(called from _app_views_back_office_control_documents_utd_pdf_prawn__2671113783120882194_118963520 '\
-        'at app/views/back_office/control/documents/utd.pdf.prawn:1)',
-        'rails', [
-        'app/views/some/view.pdf.prawn:170 block in _app_views_some_view_pdf_prawn__1733852578922288085_742240'
-      ]]).to eq(
-        digest[
-          'Rails 6.1 will return Content-Type header without modification. '\
-          'If you want just the MIME type, please use `#media_type` instead. '\
-          '(called from _app_views_back_office_control_documents_utd_pdf_prawn__4007970162645015293_1241740 '\
-          'at app/views/back_office/control/documents/utd.pdf.prawn:1)',
-          'rails', [
-          'app/views/some/view.pdf.prawn:170 block in _app_views_some_view_pdf_prawn__1234_5678'
-        ]]
-      )
+        "Rails 6.1 will return Content-Type header without modification. "\
+        "If you want just the MIME type, please use `#media_type` instead. "\
+        "(called from _app_views_back_office_control_documents_utd_pdf_prawn__2671113783120882194_118963520 "\
+        "at app/views/back_office/control/documents/utd.pdf.prawn:1)",
+        "rails", [
+          "app/views/some/view.pdf.prawn:170 block in _app_views_some_view_pdf_prawn__1733852578922288085_742240"
+        ]]).to eq(
+          digest[
+            "Rails 6.1 will return Content-Type header without modification. "\
+            "If you want just the MIME type, please use `#media_type` instead. "\
+            "(called from _app_views_back_office_control_documents_utd_pdf_prawn__4007970162645015293_1241740 "\
+            "at app/views/back_office/control/documents/utd.pdf.prawn:1)",
+            "rails", [
+              "app/views/some/view.pdf.prawn:170 block in _app_views_some_view_pdf_prawn__1234_5678"
+            ]]
+        )
     end
 
     it "ignores line numbers in pry" do
       expect(digest[
-        '(pry):475: warning: already initialized constant Foo', 'warning', [ "(pry):475:in `<class:Bar>'" ]
+        "(pry):475: warning: already initialized constant Foo", "warning", ["(pry):475:in `<class:Bar>'"]
       ]).to eq(digest[
-        '(pry):123: warning: already initialized constant Foo', 'warning', [ "(pry):123:in `<class:Bar>'" ]
+        "(pry):123: warning: already initialized constant Foo", "warning", ["(pry):123:in `<class:Bar>'"]
       ])
     end
   end

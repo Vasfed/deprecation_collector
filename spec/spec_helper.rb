@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
 require "rails"
-require 'timecop'
+require "timecop"
 require "active_support"
 require "deprecation_collector"
 
-ENV['RAILS_ENV'] = 'test'
+ENV["RAILS_ENV"] = "test"
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
