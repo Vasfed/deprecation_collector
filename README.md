@@ -17,9 +17,9 @@ bundle add deprecation_collector
 Add an initializer with configuration, like
 
 ```ruby
-  DeprecationCollector.create_instance(redis: your_redis_connection)
   Rails.application.config.to_prepare do
     DeprecationCollector.install do |instance|
+      instance.redis = Redis.new # default is $redis
       instance.app_revision = ::GIT_REVISION
       instance.count = false
       instance.save_full_backtrace = true
