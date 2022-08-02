@@ -74,12 +74,14 @@ RSpec.describe DeprecationCollector do
     end
 
     it "from activesupport" do
+      allow(described_class).to receive(:stock_activesupport_behavior).and_return(:raise)
       expect do
         app_code = proc { ActiveSupport::Deprecation.warn("Test deprecation") }
         app_code[]
       rescue ActiveSupport::DeprecationException
         # в тестах это нормально
       end.to change(collector, :unsent_data?).from(false).to(true)
+
       collector.write_to_redis(force: true)
       item = collector.read_each.first
       expect(item).to include(

@@ -21,11 +21,14 @@ class DeprecationCollector
       ActiveSupport::Deprecation.behavior = lambda do |message, callstack, deprecation_horizon, gem_name|
         # not polite to turn off all other possible behaviors, but otherwise may get duplicate calls
         DeprecationCollector.collect(message, callstack, :rails)
-        stock_behavior = Rails.application&.config&.active_support&.deprecation || :log
-        ActiveSupport::Deprecation::DEFAULT_BEHAVIORS[stock_behavior].call(
+        ActiveSupport::Deprecation::DEFAULT_BEHAVIORS[stock_activesupport_behavior].call(
           message, callstack, deprecation_horizon, gem_name
         )
       end
+    end
+
+    def stock_activesupport_behavior
+      Rails.application&.config&.active_support&.deprecation || :log
     end
 
     def tap_kernel
