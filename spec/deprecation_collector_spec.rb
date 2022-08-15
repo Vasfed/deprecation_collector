@@ -19,20 +19,14 @@ RSpec.describe DeprecationCollector do
     end
   end
 
-  describe described_class::Deprecation do
-    subject(:deprecation) { described_class.new(message, :some_realm, backtrace) }
-
-    it { expect(deprecation.app_traceline).to start_with("spec/deprecation_collector_spec.rb") }
+  before do
+    # если вдруг в тестах что-то насобиралось почему-то
+    collector.write_to_redis(force: true) # сбрасываем кеш процесса
+    # expect(collector.read_each.to_a).to eq([]) # - так можно посмотреть что там насобиралось
+    collector.flush_redis(enable: true)
   end
 
   describe "collection" do
-    before do
-      # если вдруг в тестах что-то насобиралось почему-то
-      collector.write_to_redis(force: true) # сбрасываем кеш процесса
-      # expect(collector.read_each.to_a).to eq([]) # - так можно посмотреть что там насобиралось
-      collector.flush_redis(enable: true)
-    end
-
     it "writing and reading redis" do
       allow(redis).to receive(:hincrby).and_call_original
 
@@ -184,6 +178,23 @@ RSpec.describe DeprecationCollector do
       ]).to eq(digest[
         "(pry):123: warning: already initialized constant Foo", "warning", ["(pry):123:in `<class:Bar>'"]
       ])
+    end
+  end
+
+  describe "#cleanup" do
+    before do
+      collector.collect(message, backtrace)
+      collector.collect("other message", backtrace)
+      collector.write_to_redis(force: true)
+    end
+
+    it "removes with filter" do
+      expect do
+        expect(collector.cleanup { |wrn| wrn[:message].include?(message) }).to eq "1 removed, 1 left"
+      end.to change { collector.read_each.to_a.size }.from(2).to(1)
+
+      expect(collector.cleanup { |wrn| wrn[:message].include?(message) }).to eq "0 removed, 1 left"
+      expect(collector.cleanup { |wrn| wrn[:message].include?("other message") }).to eq "1 removed, 0 left"
     end
   end
 end

@@ -5,6 +5,7 @@ require_relative "deprecation_collector/deprecation"
 require_relative "deprecation_collector/collectors"
 require "time"
 require "redis"
+require "json"
 
 # singleton class for collector
 class DeprecationCollector
@@ -163,6 +164,10 @@ class DeprecationCollector
     @redis.set("deprecations:enabled", "false")
   end
 
+  def dump
+    read_each.to_a.to_json
+  end
+
   def read_each
     return to_enum(:read_each) unless block_given?
 
@@ -210,7 +215,7 @@ class DeprecationCollector
       cursor, data_pairs = @redis.hscan("deprecations:data", cursor) # NB: some pages may be empty
       total += data_pairs.size
       removed += delete_deprecations(
-        data_pairs.select { |_digest, data| !block_given? || yield(JSON.parse(data, symbolize_names: true)) }.keys
+        data_pairs.to_h.select { |_digest, data| !block_given? || yield(JSON.parse(data, symbolize_names: true)) }.keys
       )
       break if cursor == "0"
     end
