@@ -2,6 +2,8 @@
 [![Gem Version](https://badge.fury.io/rb/deprecation_collector.svg)](https://badge.fury.io/rb/deprecation_collector)
 
 Collects ruby and rails deprecation warnings.
+Designed to be suitable for use in production under load.
+
 (gem is a work-in-process, documentation will come later)
 
 ## Installation
@@ -41,7 +43,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/deprecation_collector.
+Bug reports and pull requests are welcome on GitHub at https://github.com/Vasfed/deprecation_collector.
 
 ## License
 

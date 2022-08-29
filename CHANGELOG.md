@@ -1,5 +1,8 @@
 == unreleased
+- 
 
+== 0.0.3
+- Fixed selective deprecation cleanup (`DeprecationCollector.instance.cleanup { |d| d[:message].include?('foo') }`)
 
 == 0.0.2
 
