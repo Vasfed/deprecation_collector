@@ -3,7 +3,7 @@
 class DeprecationCollector
   # :nodoc:
   class Deprecation
-    attr_reader :message, :realm, :gem_traceline, :app_traceline, :occurences, :full_backtrace
+    attr_reader :message, :realm, :gem_traceline, :app_traceline, :occurences, :first_timestamp, :full_backtrace
 
     CLEANUP_REGEXES = {
       # rails views generated methods names are unique per-worker
@@ -20,6 +20,7 @@ class DeprecationCollector
       @occurences = 0
       @gem_traceline = find_gem_traceline(backtrace)
       @app_traceline = find_app_traceline(backtrace)
+      @first_timestamp = Time.now.to_i
 
       cleanup_prefixes.each do |path|
         @gem_traceline.delete_prefix!(path)
@@ -68,6 +69,7 @@ class DeprecationCollector
         hostname: Socket.gethostname,
         revision: DeprecationCollector.instance.app_revision,
         count: @occurences, # output anyway for frequency estimation (during write_interval inside single process)
+        first_timestamp: first_timestamp, # this may not be accurate, a worker with later timestamp may dump earlier
         digest_base: digest_base # for debug purposes
       }.compact
     end
