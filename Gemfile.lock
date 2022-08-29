@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    deprecation_collector (0.0.4)
+    deprecation_collector (0.0.5)
       redis (>= 2.0)
 
 GEM
@@ -65,6 +65,7 @@ GEM
     ast (2.4.2)
     builder (3.2.4)
     concurrent-ruby (1.1.10)
+    connection_pool (2.2.5)
     crass (1.0.6)
     diff-lcs (1.5.0)
     erubi (1.10.0)
@@ -123,7 +124,10 @@ GEM
       thor (>= 0.20.3, < 2.0)
     rainbow (3.1.1)
     rake (13.0.6)
-    redis (4.7.1)
+    redis (5.0.1)
+      redis-client (~> 0.7)
+    redis-client (0.7.1)
+      connection_pool
     regexp_parser (2.5.0)
     rexml (3.2.5)
     rspec (3.11.0)
