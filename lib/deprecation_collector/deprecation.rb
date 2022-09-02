@@ -54,7 +54,7 @@ class DeprecationCollector
     end
 
     def digest_base
-      "1:#{RUBY_VERSION}:#{Rails.version}:#{message_for_digest}:#{gem_traceline}:#{app_traceline}"
+      "1:#{RUBY_VERSION}:#{defined?(Rails) && Rails.version}:#{message_for_digest}:#{gem_traceline}:#{app_traceline}"
     end
 
     def as_json(_options = {})

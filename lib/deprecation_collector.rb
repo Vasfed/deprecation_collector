@@ -54,7 +54,8 @@ class DeprecationCollector
   attr_accessor :count, :raise_on_deprecation, :save_full_backtrace,
                 :exclude_realms,
                 :write_interval, :write_interval_jitter,
-                :app_revision, :app_root
+                :app_revision, :app_root,
+                :print_to_stderr, :print_recurring
   attr_writer :redis
 
   def initialize(mutex: nil)
@@ -97,8 +98,8 @@ class DeprecationCollector
     raise "Deprecation: #{message}" if @raise_on_deprecation
 
     deprecation = Deprecation.new(message, realm, backtrace, cleanup_prefixes)
-    store_deprecation(deprecation)
-    log_deprecation_if_needed(deprecation)
+    fresh = store_deprecation(deprecation)
+    log_deprecation_if_needed(deprecation, fresh)
   end
 
   def unsent_data?
@@ -226,18 +227,22 @@ class DeprecationCollector
 
   def store_deprecation(deprecation)
     return if deprecation.ignored?
+    fresh = !@deprecations.key?(deprecation.digest)
 
     @deprecations_mutex.synchronize do
       (@deprecations[deprecation.digest] ||= deprecation).touch
     end
 
     write_to_redis if current_time - @last_write_time > (@write_interval + rand(@write_interval_jitter))
+    fresh
   end
 
-  def log_deprecation_if_needed(deprecation)
-    return unless defined?(Rails) && Rails.env.development? && !deprecation.ignored?
-
-    $stderr.puts(deprecation.message) # rubocop:disable Style/StderrPuts
+  def log_deprecation_if_needed(deprecation, fresh)
+    return unless print_to_stderr && !deprecation.ignored?
+    return unless fresh || print_recurring
+    msg = deprecation.message
+    msg = "DEPRECATION: #{msg}" unless msg.start_with?('DEPRECAT')
+    $stderr.puts(msg) # rubocop:disable Style/StderrPuts
   end
 
   def current_time
@@ -247,7 +252,12 @@ class DeprecationCollector
   end
 
   def decode_deprecation(digest, data, count, notes)
+    return nil unless data
     data = JSON.parse(data, symbolize_names: true)
+    unless data.is_a?(Hash)
+      binding.irb
+      return nil
+    end
     data[:digest] = digest
     data[:notes] = JSON.parse(notes, symbolize_names: true) if notes
     data[:count] = count.to_i if count

@@ -28,6 +28,8 @@ Add an initializer with configuration, like
       instance.raise_on_deprecation = false
       instance.write_interval = (::Rails.env.production? && 15.minutes) || 1.minute
       instance.exclude_realms = %i[kernel] if Rails.env.production?
+      instance.print_to_stderr = true if Rails.env.development?
+      instance.print_recurring = false
       instance.ignored_messages = [
         "Ignoring db/schema_cache.yml because it has expired"
       ]
