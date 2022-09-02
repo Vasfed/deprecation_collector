@@ -191,10 +191,10 @@ class DeprecationCollector
   def read_one(digest)
     decode_deprecation(
       digest,
-      *@redis.pipelined do
-        @redis.hget("deprecations:data", digest)
-        @redis.hget("deprecations:counter", digest)
-        @redis.hget("deprecations:notes", digest)
+      *@redis.pipelined do |pipe|
+        pipe.hget("deprecations:data", digest)
+        pipe.hget("deprecations:counter", digest)
+        pipe.hget("deprecations:notes", digest)
       end
     )
   end
@@ -202,10 +202,10 @@ class DeprecationCollector
   def delete_deprecations(remove_digests)
     return 0 unless remove_digests.any?
 
-    @redis.pipelined do
-      @redis.hdel("deprecations:data", *remove_digests)
-      @redis.hdel("deprecations:notes", *remove_digests)
-      @redis.hdel("deprecations:counter", *remove_digests) if @count
+    @redis.pipelined do |pipe|
+      pipe.hdel("deprecations:data", *remove_digests)
+      pipe.hdel("deprecations:notes", *remove_digests)
+      pipe.hdel("deprecations:counter", *remove_digests) if @count
     end.first
   end
 
@@ -265,9 +265,9 @@ class DeprecationCollector
   end
 
   def write_count_to_redis(deprecations_to_flush)
-    @redis.pipelined do
+    @redis.pipelined do |pipe|
       deprecations_to_flush.each_pair do |digest, deprecation|
-        @redis.hincrby("deprecations:counter", digest, deprecation.occurences)
+        pipe.hincrby("deprecations:counter", digest, deprecation.occurences)
       end
     end
   end

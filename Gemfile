@@ -18,3 +18,5 @@ gem "rubocop-rspec"
 
 # TODO: appraisals
 gem "rails", "6.0"
+
+gem 'redis', '~>4.8'

@@ -27,5 +27,5 @@ Gem::Specification.new do |spec|
   end
   spec.require_paths = ["lib"]
 
-  spec.add_dependency "redis", ">= 2.0" # TODO: check exact minimum version
+  spec.add_dependency "redis", ">= 3.0"
 end
