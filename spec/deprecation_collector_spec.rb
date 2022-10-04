@@ -16,6 +16,9 @@ RSpec.describe DeprecationCollector do
       instance.app_root = File.expand_path("..", __dir__)
       instance.count = false
       instance.save_full_backtrace = true
+      instance.context_saver do
+        { some: "context" }
+      end
     end
   end
 
@@ -86,6 +89,7 @@ RSpec.describe DeprecationCollector do
         realm: "rails"
       )
       expect(item[:gem_traceline]).to be_nil
+      expect(item[:context]).to eq({ some: "context" })
       expect(item).not_to have_key(:gem_traceline)
     end
 

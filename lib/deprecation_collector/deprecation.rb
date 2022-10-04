@@ -4,6 +4,7 @@ class DeprecationCollector
   # :nodoc:
   class Deprecation
     attr_reader :message, :realm, :gem_traceline, :app_traceline, :occurences, :first_timestamp, :full_backtrace
+    attr_accessor :context
 
     CLEANUP_REGEXES = {
       # rails views generated methods names are unique per-worker
@@ -70,7 +71,8 @@ class DeprecationCollector
         revision: DeprecationCollector.instance.app_revision,
         count: @occurences, # output anyway for frequency estimation (during write_interval inside single process)
         first_timestamp: first_timestamp, # this may not be accurate, a worker with later timestamp may dump earlier
-        digest_base: digest_base # for debug purposes
+        digest_base: digest_base, # for debug purposes
+        context: context
       }.compact
     end
 

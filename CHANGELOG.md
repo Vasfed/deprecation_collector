@@ -1,4 +1,7 @@
-== 0.0.5 (unreleased)
+== 0.0.6
+- added custom context saving ability
+
+== 0.0.5
 - options `print_to_stderr`, `print_recurring`
 - fix redis deprecated `pipelined` block arity (support for redis 5)
 

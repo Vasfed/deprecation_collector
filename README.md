@@ -33,6 +33,10 @@ Add an initializer with configuration, like
       instance.ignored_messages = [
         "Ignoring db/schema_cache.yml because it has expired"
       ]
+      instance.context_saver do
+        # this will only be called for new deprecations, return value must be json-compatible
+        { some: "custom", context: "for example request.id" }
+      end
     end
   end
 ```

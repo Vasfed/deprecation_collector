@@ -56,7 +56,7 @@ class DeprecationCollector
                 :write_interval, :write_interval_jitter,
                 :app_revision, :app_root,
                 :print_to_stderr, :print_recurring
-  attr_writer :redis
+  attr_writer :redis, :context_saver
 
   def initialize(mutex: nil)
     # on cruby hash itself is threadsafe, but we need to prevent races
@@ -79,10 +79,17 @@ class DeprecationCollector
     # NB: in production with hugreds of workers may easily overload redis with writes, so more delay needed:
     @write_interval = 900 # 15.minutes
     @write_interval_jitter = 60
+    @context_saver = nil
   end
 
   def ignored_messages=(val)
     @ignore_message_regexp = (val && Regexp.union(val)) || nil
+  end
+
+  def context_saver(&block)
+    return @context_saver unless block_given?
+
+    @context_saver = block
   end
 
   def app_root_prefix
@@ -228,6 +235,7 @@ class DeprecationCollector
   def store_deprecation(deprecation)
     return if deprecation.ignored?
     fresh = !@deprecations.key?(deprecation.digest)
+    deprecation.context = context_saver.call if context_saver
 
     @deprecations_mutex.synchronize do
       (@deprecations[deprecation.digest] ||= deprecation).touch
