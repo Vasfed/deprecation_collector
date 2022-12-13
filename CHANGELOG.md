@@ -1,7 +1,9 @@
 == 0.1.0
-- changed all `caller` use to `caller_locations` to match rails (and take advantage of it)
+- kinda-breaking: ruby 2.4 was in fact not supported, so changed requirement to 2.5
 - prevent recursion when deprecation fires in `context_saver` hook
 - prevent recursion in most cases if a deprecation fires in collector itself
+
+- changed all `caller` use to `caller_locations` to match rails (and take advantage of it), `#collect` now expects backtrace with an array of `Thread::Backtrace::Location`
 - added GitHub Actions CI
 - added ability to run without rails
 
