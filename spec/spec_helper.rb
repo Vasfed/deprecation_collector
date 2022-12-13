@@ -1,12 +1,19 @@
 # frozen_string_literal: true
 
 require "timecop"
+
+unless ENV['REALREDIS']
+  require "fakeredis"
+  require "fakeredis/rspec"
+end
+
 begin
   require "rails"
   require "active_support"
 rescue LoadError
   puts "No rails"
 end
+
 require "deprecation_collector"
 
 ENV["RAILS_ENV"] = "test"

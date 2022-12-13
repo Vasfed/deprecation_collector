@@ -72,6 +72,8 @@ GEM
     crass (1.0.6)
     diff-lcs (1.5.0)
     erubi (1.10.0)
+    fakeredis (0.8.0)
+      redis (~> 4.1)
     globalid (1.0.0)
       activesupport (>= 5.0)
     i18n (1.10.0)
@@ -198,6 +200,7 @@ PLATFORMS
 DEPENDENCIES
   appraisal
   deprecation_collector!
+  fakeredis
   rails (= 6.0)
   rake (~> 13.0)
   redis (~> 4.8)

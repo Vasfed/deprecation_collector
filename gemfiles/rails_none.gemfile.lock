@@ -12,6 +12,8 @@ GEM
       rake
       thor (>= 0.14.0)
     diff-lcs (1.5.0)
+    fakeredis (0.8.0)
+      redis (~> 4.1)
     rake (13.0.6)
     redis (4.8.0)
     rspec (3.12.0)
@@ -23,12 +25,12 @@ GEM
     rspec-expectations (3.12.0)
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.12.0)
-    rspec-mocks (3.12.0)
+    rspec-mocks (3.12.1)
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.12.0)
     rspec-support (3.12.0)
     thor (1.2.1)
-    timecop (0.9.5)
+    timecop (0.9.6)
 
 PLATFORMS
   x86_64-darwin-21
@@ -37,6 +39,7 @@ PLATFORMS
 DEPENDENCIES
   appraisal
   deprecation_collector!
+  fakeredis
   rake (~> 13.0)
   redis (~> 4.8)
   rspec (~> 3.0)

@@ -24,3 +24,4 @@ end
 
 
 gem 'redis', '~>4.8'
+gem 'fakeredis'
