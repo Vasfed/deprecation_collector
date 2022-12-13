@@ -144,6 +144,40 @@ RSpec.describe DeprecationCollector do
     ensure
       collector.ignored_messages = nil
     end
+
+    context "when context_saver has a deprecation inside" do
+      let(:context_saver) do
+        lambda do
+          # no lambda in stacktrace, but the following call is, prevent deadloop
+          raise "do not want loop here" if caller_locations.any? { |l| l.path == __FILE__ && l.lineno == __LINE__ + 1 } # rubocop:disable Layout/EmptyLineAfterGuardClause
+          collector.collect("some deprecation in context_saver", caller_locations, :context_saver)
+          { some: "context" }
+        end
+      end
+
+      around do |example|
+        prev_saver = collector.context_saver
+        collector.context_saver = context_saver
+        example.run
+      ensure
+        collector.context_saver = prev_saver
+      end
+
+      it "saves secondary deprecation without context" do
+        expect do
+          collector.collect("primary deprecation")
+        end.to change { collector.send(:unsent_deprecations).size }.by(2)
+      end
+    end
+
+    context "when deprecation_collector itself has a deprecation" do
+      it "does not loop" do
+        allow(collector).to receive(:log_deprecation_if_needed) { collector.collect("internal deprecation") }
+        expect do
+          collector.collect("primary deprecation")
+        end.to change { collector.send(:unsent_deprecations).size }.by(2)
+      end
+    end
   end
 
   describe "aggregation digest" do
