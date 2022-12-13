@@ -104,11 +104,12 @@ class DeprecationCollector
   def collect(message, backtrace = caller_locations, realm = :unknown)
     return if !@enabled || exclude_realms.include?(realm) || @ignore_message_regexp&.match?(message)
     raise "Deprecation: #{message}" if @raise_on_deprecation
+
     recursion_iterations_detected = backtrace.count { |l| l.path == __FILE__ && l.base_label == __method__.to_s }
     return if recursion_iterations_detected > 1 # we have a loop, ignore deep nested deprecations
 
     deprecation = Deprecation.new(message, realm, backtrace, cleanup_prefixes)
-    fresh = store_deprecation(deprecation, recursion_iterations_detected == 0)
+    fresh = store_deprecation(deprecation, allow_context: recursion_iterations_detected.zero?)
     log_deprecation_if_needed(deprecation, fresh)
   end
 
@@ -126,7 +127,7 @@ class DeprecationCollector
     @redis
   end
 
-  def write_to_redis(force: false) # rubocop:disable Metrics/AbcSize
+  def write_to_redis(force: false)
     return unless force || (@enabled && (current_time > @last_write_time + @write_interval))
 
     deprecations_to_flush = nil
@@ -239,8 +240,9 @@ class DeprecationCollector
     @deprecations
   end
 
-  def store_deprecation(deprecation, allow_context = true)
+  def store_deprecation(deprecation, allow_context: true)
     return if deprecation.ignored?
+
     fresh = !@deprecations.key?(deprecation.digest)
     deprecation.context = context_saver.call if context_saver && allow_context
 
@@ -255,8 +257,9 @@ class DeprecationCollector
   def log_deprecation_if_needed(deprecation, fresh)
     return unless print_to_stderr && !deprecation.ignored?
     return unless fresh || print_recurring
+
     msg = deprecation.message
-    msg = "DEPRECATION: #{msg}" unless msg.start_with?('DEPRECAT')
+    msg = "DEPRECATION: #{msg}" unless msg.start_with?("DEPRECAT")
     $stderr.puts(msg) # rubocop:disable Style/StderrPuts
   end
 
@@ -268,11 +271,13 @@ class DeprecationCollector
 
   def decode_deprecation(digest, data, count, notes)
     return nil unless data
+
     data = JSON.parse(data, symbolize_names: true)
     unless data.is_a?(Hash)
       # this should not happen (this means broken Deprecation#to_json or some data curruption)
       return nil
     end
+
     data[:digest] = digest
     data[:notes] = JSON.parse(notes, symbolize_names: true) if notes
     data[:count] = count.to_i if count

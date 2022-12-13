@@ -37,7 +37,7 @@ RSpec.describe DeprecationCollector do
       2.times { collector.collect(message, backtrace) }
       expect(collector.read_each.to_a).to be_empty
 
-      Timecop.travel(Time.now + 20 * 60) do # 20.minutes.from_now
+      Timecop.travel(Time.now + 1200) do # 20.minutes.from_now
         # тут оно сбросит в редиску
         expect { collector.collect(message, backtrace) }.to change(collector, :unsent_data?).from(true).to(false)
 

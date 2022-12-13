@@ -1,7 +1,9 @@
 AllCops:
-  # spec/ have TargetRubyVersion: 2.6
-  TargetRubyVersion: 2.4
+  # note additional conf in spec/
+  TargetRubyVersion: 2.5
   NewCops: enable
+  Exclude:
+    - gemfiles/*
 
 Style/StringLiterals:
   Enabled: true
@@ -14,7 +16,8 @@ Style/StringLiteralsInInterpolation:
 Layout/LineLength:
   Max: 120
 
-Metrics/ClassLength: { Max: 200 }
+Metrics/ClassLength: { Max: 230 }
 Metrics/MethodLength: { Max: 15 }
+Metrics/AbcSize: { Max: 20}
 Metrics/CyclomaticComplexity: { Max: 9 }
 Metrics/PerceivedComplexity: { Max: 9 }

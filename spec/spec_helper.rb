@@ -2,7 +2,7 @@
 
 require "timecop"
 
-unless ENV['REALREDIS']
+unless ENV["REALREDIS"]
   require "fakeredis"
   require "fakeredis/rspec"
 end

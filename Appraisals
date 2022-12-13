@@ -1,11 +1,13 @@
+# frozen_string_literal: true
 
-appraise 'rails_none' do
+appraise "rails_none" do
+  # none here
 end
 
-appraise 'rails_6' do
+appraise "rails_6" do
   gem "rails", "~>6.0"
 end
 
-appraise 'rails_7' do
+appraise "rails_7" do
   gem "rails", "~>7.0"
 end
