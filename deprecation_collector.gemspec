@@ -12,7 +12,7 @@ Gem::Specification.new do |spec|
   spec.description = "Collects and aggregates warnings and deprecations. Optimized for production environment."
   spec.homepage = "https://github.com/Vasfed/deprecation_collector"
   spec.license = "MIT"
-  spec.required_ruby_version = ">= 2.4.0"
+  spec.required_ruby_version = ">= 2.5.0"
 
   spec.metadata["homepage_uri"] = spec.homepage
   spec.metadata["source_code_uri"] = "https://github.com/Vasfed/deprecation_collector"

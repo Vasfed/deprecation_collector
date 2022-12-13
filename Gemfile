@@ -19,7 +19,7 @@ unless defined?(Appraisal)
     gem "rubocop-rspec"
   end
 
-  gem "rails", "6.0"
+  gem "rails", "~>6.0.0"
 end
 
 

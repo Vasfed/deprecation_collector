@@ -2,9 +2,8 @@
 appraise 'rails_none' do
 end
 
-appraise 'rails_5' do
-  # for ruby 2.4
-  gem "rails", "~>5.2"
+appraise 'rails_6' do
+  gem "rails", "~>6.0"
 end
 
 appraise 'rails_7' do

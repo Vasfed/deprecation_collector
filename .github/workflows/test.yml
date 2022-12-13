@@ -11,8 +11,8 @@ jobs:
           - rails_none
           - rails_7
         include:
-          - ruby-version: 2.4.10
-            appraisal: rails_5
+          - ruby-version: 2.5.9
+            appraisal: rails_6
     env:
       BUNDLE_WITHOUT: lint
       BUNDLE_GEMFILE: ${{ github.workspace }}/gemfiles/${{ matrix.appraisal }}.gemfile
