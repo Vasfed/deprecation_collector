@@ -1,0 +1,49 @@
+PATH
+  remote: ..
+  specs:
+    deprecation_collector (0.0.6)
+      redis (>= 3.0)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    appraisal (2.4.1)
+      bundler
+      rake
+      thor (>= 0.14.0)
+    diff-lcs (1.5.0)
+    fakeredis (0.8.0)
+      redis (~> 4.1)
+    rake (13.0.6)
+    redis (4.8.0)
+    rspec (3.12.0)
+      rspec-core (~> 3.12.0)
+      rspec-expectations (~> 3.12.0)
+      rspec-mocks (~> 3.12.0)
+    rspec-core (3.12.0)
+      rspec-support (~> 3.12.0)
+    rspec-expectations (3.12.0)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.12.0)
+    rspec-mocks (3.12.1)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.12.0)
+    rspec-support (3.12.0)
+    thor (1.2.1)
+    timecop (0.9.6)
+
+PLATFORMS
+  x86_64-darwin-21
+  x86_64-linux
+
+DEPENDENCIES
+  appraisal
+  deprecation_collector!
+  fakeredis
+  rake (~> 13.0)
+  redis (~> 4.8)
+  rspec (~> 3.0)
+  timecop
+
+BUNDLED WITH
+   2.3.10

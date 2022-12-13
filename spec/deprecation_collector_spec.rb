@@ -37,7 +37,7 @@ RSpec.describe DeprecationCollector do
       2.times { collector.collect(message, backtrace) }
       expect(collector.read_each.to_a).to be_empty
 
-      Timecop.travel(20.minutes.from_now) do
+      Timecop.travel(Time.now + 20 * 60) do # 20.minutes.from_now
         # тут оно сбросит в редиску
         expect { collector.collect(message, backtrace) }.to change(collector, :unsent_data?).from(true).to(false)
 
@@ -63,14 +63,16 @@ RSpec.describe DeprecationCollector do
         app_traceline: %r{^spec/deprecation_collector_spec\.rb:\d+:in `block \(4 levels\) in <top \(required\)>'},
         gem_traceline:
           %r{^/gems/rspec-core-[0-9.]+/lib/rspec/core/memoized_helpers\.rb:\d+:in `block \(2 levels\) in let'},
-        rails_version: Rails.version,
         ruby_version: RUBY_VERSION
       )
+      expect(item).to include(rails_version: Rails.version) if defined?(Rails)
 
       expect { collector.flush_redis }.to change { collector.read_each.to_a }.to([])
     end
 
     it "from activesupport" do
+      skip "testing without ActiveSupport" unless defined? ActiveSupport
+
       allow(described_class).to receive(:stock_activesupport_behavior).and_return(:raise)
       expect do
         app_code = proc { ActiveSupport::Deprecation.warn("Test deprecation") }

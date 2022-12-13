@@ -6,6 +6,7 @@ require_relative "deprecation_collector/collectors"
 require "time"
 require "redis"
 require "json"
+require "set"
 
 # singleton class for collector
 class DeprecationCollector
@@ -269,7 +270,7 @@ class DeprecationCollector
     return nil unless data
     data = JSON.parse(data, symbolize_names: true)
     unless data.is_a?(Hash)
-      binding.irb
+      # this should not happen (this means broken Deprecation#to_json or some data curruption)
       return nil
     end
     data[:digest] = digest

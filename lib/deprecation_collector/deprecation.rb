@@ -76,6 +76,10 @@ class DeprecationCollector
       }.compact
     end
 
+    def to_json
+      as_json.to_json
+    end
+
     protected
 
     def find_app_traceline(backtrace)
