@@ -100,7 +100,7 @@ class DeprecationCollector
     @cleanup_prefixes ||= Gem.path + [app_root_prefix]
   end
 
-  def collect(message, backtrace, realm = :unknown)
+  def collect(message, backtrace = caller_locations, realm = :unknown)
     return if !@enabled || exclude_realms.include?(realm) || @ignore_message_regexp&.match?(message)
     raise "Deprecation: #{message}" if @raise_on_deprecation
 

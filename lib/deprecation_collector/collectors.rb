@@ -39,7 +39,7 @@ class DeprecationCollector
           remove_method :warn
         end
         module_function(define_method(:warn) do |*messages, **kwargs|
-          KernelWarningCollector.warn(*messages, backtrace: caller, **kwargs)
+          KernelWarningCollector.warn(*messages, backtrace: caller_locations, **kwargs)
         end)
       end
     end
@@ -83,7 +83,7 @@ class DeprecationCollector
   # taps into ruby core Warning#warn
   module WarningCollector
     def warn(str)
-      backtrace = caller
+      backtrace = caller_locations
       MultipartWarningJoiner.handle(str) do |multi_str|
         DeprecationCollector.collect(multi_str, backtrace, :warning)
       end
@@ -95,7 +95,7 @@ class DeprecationCollector
     module_function
 
     def warn(*messages, backtrace: nil, **_kwargs)
-      backtrace ||= caller
+      backtrace ||= caller_locations
       str = messages.map(&:to_s).join("\n").strip
       DeprecationCollector.collect(str, backtrace, :kernel)
       # not passing to `super` - it will pass to Warning#warn, we do not want that
