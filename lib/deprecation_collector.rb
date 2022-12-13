@@ -103,14 +103,16 @@ class DeprecationCollector
   def collect(message, backtrace = caller_locations, realm = :unknown)
     return if !@enabled || exclude_realms.include?(realm) || @ignore_message_regexp&.match?(message)
     raise "Deprecation: #{message}" if @raise_on_deprecation
+    recursion_iterations_detected = backtrace.count { |l| l.path == __FILE__ && l.base_label == __method__.to_s }
+    return if recursion_iterations_detected > 1 # we have a loop, ignore deep nested deprecations
 
     deprecation = Deprecation.new(message, realm, backtrace, cleanup_prefixes)
-    fresh = store_deprecation(deprecation)
+    fresh = store_deprecation(deprecation, recursion_iterations_detected == 0)
     log_deprecation_if_needed(deprecation, fresh)
   end
 
   def unsent_data?
-    @deprecations.any?
+    unsent_deprecations.any?
   end
 
   def count?
@@ -232,10 +234,14 @@ class DeprecationCollector
 
   protected
 
-  def store_deprecation(deprecation)
+  def unsent_deprecations
+    @deprecations
+  end
+
+  def store_deprecation(deprecation, allow_context = true)
     return if deprecation.ignored?
     fresh = !@deprecations.key?(deprecation.digest)
-    deprecation.context = context_saver.call if context_saver
+    deprecation.context = context_saver.call if context_saver && allow_context
 
     @deprecations_mutex.synchronize do
       (@deprecations[deprecation.digest] ||= deprecation).touch

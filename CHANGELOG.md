@@ -1,5 +1,7 @@
 == 0.1.0
 - changed all `caller` use to `caller_locations` to match rails (and take advantage of it)
+- prevent recursion when deprecation fires in `context_saver` hook
+- prevent recursion in most cases if a deprecation fires in collector itself
 
 == 0.0.6
 - added custom context saving ability
