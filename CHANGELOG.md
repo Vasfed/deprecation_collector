@@ -3,6 +3,7 @@
 - prevent recursion when deprecation fires in `context_saver` hook
 - prevent recursion in most cases if a deprecation fires in collector itself
 - added GitHub Actions CI
+- added ability to run without rails
 
 == 0.0.6
 - added custom context saving ability
