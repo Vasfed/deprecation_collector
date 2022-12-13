@@ -76,7 +76,7 @@ class DeprecationCollector
       }.compact
     end
 
-    def to_json
+    def to_json(_options = {})
       as_json.to_json
     end
 

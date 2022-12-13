@@ -22,6 +22,5 @@ unless defined?(Appraisal)
   gem "rails", "~>6.0.0"
 end
 
-
-gem 'redis', '~>4.8'
-gem 'fakeredis'
+gem "fakeredis"
+gem "redis", "~>4.8"

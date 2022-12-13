@@ -12,6 +12,6 @@ RSpec.describe DeprecationCollector::Deprecation do
   it { expect(deprecation.app_traceline).to start_with("spec/deprecation_spec.rb") }
 
   it "dumps to json hash" do
-    expect(deprecation.to_json).to start_with('{')
+    expect(deprecation.to_json).to start_with("{")
   end
 end
