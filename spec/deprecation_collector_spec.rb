@@ -6,7 +6,7 @@ RSpec.describe DeprecationCollector do
   subject(:collector) { described_class.instance }
 
   let(:message) { "some message" }
-  let(:backtrace) { caller }
+  let(:backtrace) { caller_locations }
   let(:redis) { described_class.instance.redis }
 
   before(:all) do

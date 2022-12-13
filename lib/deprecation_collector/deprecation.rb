@@ -81,7 +81,7 @@ class DeprecationCollector
     def find_app_traceline(backtrace)
       app_root = DeprecationCollector.instance.app_root_prefix
       backtrace.find do |line|
-        line = line.to_s
+        line = line.path if line.respond_to?(:path) # in production always passes, strings should only come in test
         (!line.start_with?("/") || line.start_with?(app_root)) && !line.include?("/gems/")
       end&.to_s&.dup&.delete_prefix(app_root)
     end
