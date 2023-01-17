@@ -88,7 +88,7 @@ class DeprecationCollector
   end
 
   def context_saver(&block)
-    return @context_saver unless block_given?
+    return @context_saver unless block
 
     @context_saver = block
   end

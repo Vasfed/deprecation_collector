@@ -1,7 +1,13 @@
+require:
+  - rubocop-rspec
+  - rubocop-rake
+  - rubocop-performance
+
 AllCops:
   # note additional conf in spec/
   TargetRubyVersion: 2.5
   NewCops: enable
+  SuggestExtensions: false
   Exclude:
     - gemfiles/*
 
@@ -18,6 +24,9 @@ Layout/LineLength:
 
 Metrics/ClassLength: { Max: 230 }
 Metrics/MethodLength: { Max: 15 }
-Metrics/AbcSize: { Max: 20}
+Metrics/AbcSize: { Max: 23 }
 Metrics/CyclomaticComplexity: { Max: 9 }
 Metrics/PerceivedComplexity: { Max: 9 }
+
+RSpec/ExampleLength: { Enabled: false }
+RSpec/MultipleExpectations: { Enabled: false }

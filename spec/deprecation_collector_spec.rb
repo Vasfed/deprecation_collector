@@ -9,8 +9,8 @@ RSpec.describe DeprecationCollector do
   let(:backtrace) { caller_locations }
   let(:redis) { described_class.instance.redis }
 
-  before(:all) do
-    DeprecationCollector.install do |instance|
+  before(:all) do # rubocop:disable RSpec/BeforeAfterAll
+    DeprecationCollector.install do |instance| # rubocop:disable RSpec/DescribedClass
       instance.redis = Redis.new
       instance.app_revision = "somerevisionabc123"
       instance.app_root = File.expand_path("..", __dir__)
@@ -85,7 +85,7 @@ RSpec.describe DeprecationCollector do
       item = collector.read_each.first
       expect(item).to include(
         message: include(
-          "DEPRECATION WARNING: Test deprecation (called from block (4 levels) in <top (required)> at "\
+          "DEPRECATION WARNING: Test deprecation (called from block (4 levels) in <top (required)> at " \
           "spec/deprecation_collector_spec.rb:"
         ),
         realm: "rails"
@@ -186,17 +186,17 @@ RSpec.describe DeprecationCollector do
       end
 
       it "saves variants" do
-        expect(fingerprinter).to receive(:call).with(an_instance_of(DeprecationCollector::Deprecation))
-                                               .and_return(1, 2).exactly(3).times
+        allow(fingerprinter).to receive(:call).with(an_instance_of(DeprecationCollector::Deprecation)).and_return(1, 2)
         expect do
           3.times { collector.collect("deprecation") }
         end.to change { collector.send(:unsent_deprecations).size }.by(2)
+        expect(fingerprinter).to have_received(:call).exactly(3).times
       end
     end
 
     context "when deprecation_collector itself has a deprecation" do
       it "does not loop" do
-        allow(collector).to receive(:log_deprecation_if_needed) { collector.collect("internal deprecation") }
+        allow(collector).to receive(:log_deprecation_if_needed) { collector.collect("internal deprecation") } # rubocop:disable RSpec/SubjectStub
         expect do
           collector.collect("primary deprecation")
         end.to change { collector.send(:unsent_deprecations).size }.by(2)
@@ -209,24 +209,24 @@ RSpec.describe DeprecationCollector do
 
     it "ignores quoted data in messages" do
       expect(
-        digest['Overriding "Content-Type" header "multipart/form-data" with '\
+        digest['Overriding "Content-Type" header "multipart/form-data" with ' \
                '"multipart/form-data; boundary=----RubyFormBoundaryAfyRG13v44BT3gmJ"']
       ).to eq(digest['Overriding "" header "" with "lala"'])
     end
 
     it "ignores temporary views method names" do
       expect(digest[
-        "Rails 6.1 will return Content-Type header without modification. "\
-        "If you want just the MIME type, please use `#media_type` instead. "\
-        "(called from _app_views_back_office_control_documents_utd_pdf_prawn__2671113783120882194_118963520 "\
+        "Rails 6.1 will return Content-Type header without modification. " \
+        "If you want just the MIME type, please use `#media_type` instead. " \
+        "(called from _app_views_back_office_control_documents_utd_pdf_prawn__2671113783120882194_118963520 " \
         "at app/views/back_office/control/documents/utd.pdf.prawn:1)",
         "rails", [
           "app/views/some/view.pdf.prawn:170 block in _app_views_some_view_pdf_prawn__1733852578922288085_742240"
         ]]).to eq(
           digest[
-            "Rails 6.1 will return Content-Type header without modification. "\
-            "If you want just the MIME type, please use `#media_type` instead. "\
-            "(called from _app_views_back_office_control_documents_utd_pdf_prawn__4007970162645015293_1241740 "\
+            "Rails 6.1 will return Content-Type header without modification. " \
+            "If you want just the MIME type, please use `#media_type` instead. " \
+            "(called from _app_views_back_office_control_documents_utd_pdf_prawn__4007970162645015293_1241740 " \
             "at app/views/back_office/control/documents/utd.pdf.prawn:1)",
             "rails", [
               "app/views/some/view.pdf.prawn:170 block in _app_views_some_view_pdf_prawn__1234_5678"
