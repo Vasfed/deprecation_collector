@@ -14,6 +14,14 @@ rescue LoadError
   puts "No rails"
 end
 
+if ENV['COVERAGE']
+  require 'simplecov'
+  SimpleCov.start do
+    add_group "Lib", "lib"
+    add_group "Tests", "spec"
+  end
+end
+
 require "deprecation_collector"
 
 ENV["RAILS_ENV"] = "test"
