@@ -9,7 +9,7 @@ RSpec.describe DeprecationCollector::Deprecation do
   let(:backtrace) { caller_locations }
   let(:redis) { described_class.instance.redis }
 
-  it { expect(deprecation.app_traceline).to start_with("spec/deprecation_spec.rb") }
+  it { expect(deprecation.app_traceline).to start_with("spec/deprecation_collector/deprecation_spec.rb") }
 
   it "dumps to json hash" do
     expect(deprecation.to_json).to start_with("{")

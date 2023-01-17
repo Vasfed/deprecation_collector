@@ -4,7 +4,7 @@ class DeprecationCollector
   # :nodoc:
   class Deprecation
     attr_reader :message, :realm, :gem_traceline, :app_traceline, :occurences, :first_timestamp, :full_backtrace
-    attr_accessor :context
+    attr_accessor :context, :custom_fingerprint
 
     CLEANUP_REGEXES = {
       # rails views generated methods names are unique per-worker
@@ -55,7 +55,8 @@ class DeprecationCollector
     end
 
     def digest_base
-      "1:#{RUBY_VERSION}:#{defined?(Rails) && Rails.version}:#{message_for_digest}:#{gem_traceline}:#{app_traceline}"
+      "1:#{RUBY_VERSION}:#{defined?(Rails) && Rails.version}:#{message_for_digest}:#{gem_traceline}:#{app_traceline}" \
+        "#{":#{custom_fingerprint}" if custom_fingerprint}"
     end
 
     def as_json(_options = {})
