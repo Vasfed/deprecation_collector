@@ -73,6 +73,7 @@ RSpec.describe DeprecationCollector do
     it "from activesupport" do
       skip "testing without ActiveSupport" unless defined? ActiveSupport
 
+      expect(described_class.send(:stock_activesupport_behavior)).to be_a(Symbol)
       allow(described_class).to receive(:stock_activesupport_behavior).and_return(:raise)
       expect do
         app_code = proc { ActiveSupport::Deprecation.warn("Test deprecation") }
@@ -95,20 +96,36 @@ RSpec.describe DeprecationCollector do
       expect(item).not_to have_key(:gem_traceline)
     end
 
-    it "from ruby" do
-      expect do
-        Warning.warn "Test warning"
-      rescue ActiveSupport::DeprecationException
-        # тут не должно быть по идее, но вдруг решим кидать
-      end.to change(collector, :unsent_data?).from(false).to(true)
-      collector.write_to_redis(force: true)
-      item = collector.read_each.first
-      expect(item).to include(
-        message: include("Test warning"),
-        realm: "warning",
-        app_traceline: %r{^spec/deprecation_collector_spec\.rb:\d+:in `block \(4 levels\) in <top \(required\)>'}
-      )
-      expect(item).not_to have_key(:gem_traceline)
+    describe "WarningCollector" do
+      it "from ruby" do
+        expect do
+          Warning.warn "Test warning"
+        rescue ActiveSupport::DeprecationException
+          # тут не должно быть по идее, но вдруг решим кидать
+        end.to change(collector, :unsent_data?).from(false).to(true)
+        collector.write_to_redis(force: true)
+        item = collector.read_each.first
+        expect(item).to include(
+          message: include("Test warning"),
+          realm: "warning",
+          app_traceline: %r{^spec/deprecation_collector_spec\.rb:\d+:in `block \(5 levels\) in <top \(required\)>'}
+        )
+        expect(item).not_to have_key(:gem_traceline)
+      end
+
+      it "joins multiline warnings" do
+        expect do
+          Warning.warn "foo.rb:3: warning: already initialized constant Foo"
+          Warning.warn "foo.rb:1: warning: previous definition of Foo was here"
+        end.to change { collector.send(:unsent_deprecations).size }.by(1)
+      end
+
+      it "does not join false-positive multiparts" do
+        expect do
+          Warning.warn "foo.rb:3: warning: already initialized constant Foo"
+          Warning.warn "foo.rb:1: warning: another warning"
+        end.to change { collector.send(:unsent_deprecations).size }.by(2)
+      end
     end
 
     it "from kernel#warn" do
@@ -185,6 +202,13 @@ RSpec.describe DeprecationCollector do
         collector.fingerprinter = prev
       end
 
+      it "can be set with block" do
+        collector.fingerprinter do
+          :foo
+        end
+        expect(collector.fingerprinter.call).to eq(:foo)
+      end
+
       it "saves variants" do
         allow(fingerprinter).to receive(:call).with(an_instance_of(DeprecationCollector::Deprecation)).and_return(1, 2)
         expect do
@@ -257,6 +281,19 @@ RSpec.describe DeprecationCollector do
 
       expect(collector.cleanup { |wrn| wrn[:message].include?(message) }).to eq "0 removed, 1 left"
       expect(collector.cleanup { |wrn| wrn[:message].include?("other message") }).to eq "1 removed, 0 left"
+    end
+  end
+
+  describe "#dump" do
+    it "works" do
+      expect(collector.dump).to eq('[]')
+    end
+  end
+
+  describe "enable/disable" do
+    it "works" do
+      expect { collector.disable }.to change(collector, :enabled_in_redis?).to(false)
+      expect { collector.enable }.to change(collector, :enabled_in_redis?).to(true)
     end
   end
 end
