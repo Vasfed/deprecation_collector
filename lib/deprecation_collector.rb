@@ -57,7 +57,7 @@ class DeprecationCollector
                 :write_interval, :write_interval_jitter,
                 :app_revision, :app_root,
                 :print_to_stderr, :print_recurring
-  attr_writer :redis, :context_saver
+  attr_writer :redis, :context_saver, :fingerprinter
 
   def initialize(mutex: nil)
     # on cruby hash itself is threadsafe, but we need to prevent races
@@ -91,6 +91,12 @@ class DeprecationCollector
     return @context_saver unless block_given?
 
     @context_saver = block
+  end
+
+  def fingerprinter(&block)
+    return @fingerprinter unless block
+
+    @fingerprinter = block
   end
 
   def app_root_prefix
@@ -243,9 +249,10 @@ class DeprecationCollector
   def store_deprecation(deprecation, allow_context: true)
     return if deprecation.ignored?
 
-    fresh = !@deprecations.key?(deprecation.digest)
     deprecation.context = context_saver.call if context_saver && allow_context
+    deprecation.custom_fingerprint = fingerprinter.call(deprecation) if fingerprinter && allow_context
 
+    fresh = !@deprecations.key?(deprecation.digest)
     @deprecations_mutex.synchronize do
       (@deprecations[deprecation.digest] ||= deprecation).touch
     end

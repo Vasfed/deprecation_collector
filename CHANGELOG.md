@@ -1,3 +1,6 @@
+== 0.2.0
+- ability to add custom deprecation fingerprint (for example - controller+action), use `config.fingerprinter`
+
 == 0.1.0
 - kinda-breaking: ruby 2.4 was in fact not supported, so changed requirement to 2.5
 - prevent recursion when deprecation fires in `context_saver` hook

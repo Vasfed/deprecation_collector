@@ -172,6 +172,28 @@ RSpec.describe DeprecationCollector do
       end
     end
 
+    context "when fingerprinter set" do
+      let(:fingerprinter) do
+        double
+      end
+
+      around do |example|
+        prev = collector.fingerprinter
+        collector.fingerprinter = fingerprinter
+        example.run
+      ensure
+        collector.fingerprinter = prev
+      end
+
+      it "saves variants" do
+        expect(fingerprinter).to receive(:call).with(an_instance_of(DeprecationCollector::Deprecation))
+                                               .and_return(1, 2).exactly(3).times
+        expect do
+          3.times { collector.collect("deprecation") }
+        end.to change { collector.send(:unsent_deprecations).size }.by(2)
+      end
+    end
+
     context "when deprecation_collector itself has a deprecation" do
       it "does not loop" do
         allow(collector).to receive(:log_deprecation_if_needed) { collector.collect("internal deprecation") }

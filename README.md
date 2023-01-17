@@ -37,6 +37,10 @@ Add an initializer with configuration, like
         # this will only be called for new deprecations, return value must be json-compatible
         { some: "custom", context: "for example request.id" }
       end
+      instance.fingerprinter do |deprecation|
+        # this will be added to fingerprint; this will be ignored for recursive deprecations
+        "return_string_here"
+      end
     end
   end
 ```
