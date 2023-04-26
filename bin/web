@@ -1,0 +1,22 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require_relative 'dev_env'
+require 'rack'
+require 'deprecation_collector/web'
+
+app = Rack::Builder.new do
+  map '/deprecations' do
+    run DeprecationCollector::Web.new
+  end
+
+  map '/' do
+    run proc { |env|
+      [200, {'Content-Type' => 'text/html'}, [
+        'Hello from Deprecation collector dev server<br>See <a href="/deprecations">Deprecations</a>'
+      ]]
+    }
+  end
+end
+
+Rack::Handler::WEBrick.run app, Port: 9292

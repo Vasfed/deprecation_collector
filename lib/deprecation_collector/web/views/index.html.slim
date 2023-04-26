@@ -1,0 +1,93 @@
+header
+  h1 Deprecations
+
+  a.btn.btn-primary>(data-method="post" href=deprecation_path(:trigger) rel="nofollow") Trigger a couple
+  a.btn.btn-danger>(data-method="delete" data-confirm="Sure?" href=deprecation_path(:all) rel="nofollow")
+    i.bi.bi-trash
+    ' Delete all
+
+  - if DeprecationCollector.instance.enabled_in_redis?
+    a.btn.btn-danger>(
+      data-method="delete" href=disable_deprecations_path rel="nofollow"
+      data-confirm="Sure? Will need to restart workers after enabling"
+      ) Disable
+  - else
+    a.btn.btn-secondary>(
+      data-method="post" href=enable_deprecations_path rel="nofollow"
+    ) Turn on (after workers restart)
+
+main
+  table.table.table-striped
+    tr
+      th Count
+      th Message
+      th Location
+      th Ruby/Rails
+
+    - total = 0
+    - @deprecations.each do |deprecation|
+      - total += 1
+      tr(data-digest=deprecation[:digest])
+        td
+          a(href=deprecation_path(deprecation[:digest]))= deprecation[:count]
+          br
+          - if deprecation[:message].include?("Using the last argument as keyword parameters is deprecated") || \
+               deprecation[:message].include?("Passing the keyword argument as the last hash parameter is deprecated")
+            .badge.bg-secondary> kwargs
+          - if deprecation[:message].include?("trigger_kwargs_error_warning") || \
+               deprecation[:message].include?("trigger_rails_deprecation")
+            .badge.bg-success> test
+          - if deprecation[:realm] && deprecation[:realm] != 'rails'
+            .badge.bg-secondary>= deprecation[:realm]
+          - deprecation.dig(:notes, :tags)&.each do |tag|
+            .badge.bg-secondary> = tag
+
+        td
+          ruby:
+            msg = deprecation[:message]
+            delete_prefixes = Gem.path + [defined?(Rails) && Rails.root.to_s].compact
+            delete_prefixes.each { |path| msg.gsub!(path, '') }
+          .card.text-dark.bg-light
+            pre.pre-scrollable(style="overflow: auto; max-width: 700px; max-height: 200px; font-size: 11px")
+              code = msg.delete_prefix("DEPRECATION WARNING: ")
+          - if deprecation.dig(:notes, :comment)
+            = deprecation.dig(:notes, :comment)
+
+          - if deprecation.dig(:context, :action)
+            .small.controller = deprecation.dig(:context, :action)
+          - elsif deprecation.dig(:context, :params, :controller)
+            .small.controller = deprecation.dig(:context, :params).slice(:controller, :action).values.join('#')
+        td
+          - if deprecation[:gem_traceline]
+            = deprecation[:gem_traceline]
+            <br>
+          - if deprecation[:app_traceline]
+            - location, function = deprecation[:app_traceline].split(':in `', 2)
+            code.code_location>(style="cursor: pointer") = location
+            = function.delete_suffix("'")
+        td
+          .small.ruby = deprecation[:ruby_version]
+          .small.rails = deprecation[:rails_version]
+
+          a href=deprecation_path(deprecation[:digest]) data-method="delete" data-confirm="Delete?" rel="nofollow" title="Delete"
+            i.bi.bi-trash
+    - if total.zero?
+      tr
+        td(colspan=4)
+          p Looks like there're no deprecations
+          p
+            ' You can try
+            a(href=deprecation_path(:trigger) data-method="post" rel="nofollow") trigger a couple
+
+footer
+  - if total > 3
+    => total
+    ' deprecations
+
+javascript:
+  document.querySelectorAll('.code_location').forEach(function(elem){
+    elem.addEventListener('click', function () {
+      console.log("Copying", elem.innerText)
+      navigator.clipboard.writeText(elem.innerText);
+    }, false);
+  });

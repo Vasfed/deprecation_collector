@@ -36,4 +36,17 @@ RSpec.configure do |config|
   config.expect_with :rspec do |c|
     c.syntax = :expect
   end
+
+  config.before(:all) do # rubocop:disable RSpec/BeforeAfterAll
+    DeprecationCollector.install do |instance| # rubocop:disable RSpec/DescribedClass
+      instance.redis = Redis.new
+      instance.app_revision = "somerevisionabc123"
+      instance.app_root = File.expand_path("..", __dir__)
+      instance.count = false
+      instance.save_full_backtrace = true
+      instance.context_saver do
+        { some: "context" }
+      end
+    end
+  end
 end

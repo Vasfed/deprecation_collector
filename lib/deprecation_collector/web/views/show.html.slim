@@ -1,0 +1,12 @@
+header.mb-3
+  h1 Deprecation
+
+  a.btn.btn-secondary href=deprecations_path Back
+  a.btn.btn-danger href=deprecation_path(@deprecation[:digest]) data-method="delete" data-confirm="Delete?" rel="nofollow" title="Delete"
+    span.glyphicon.glyphicon-trash.insalesicon-trash
+    | Delete
+
+main
+  .card.text-dark.bg-light.p-3
+    pre
+      code = @deprecation.pretty_inspect

@@ -1,9 +1,6 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require "bundler/setup"
-require "deprecation_collector"
-
 # You can add fixtures and/or initialization code here to make experimenting
 # with your gem easier. You can also use a different console, if you like.
 
@@ -11,22 +8,10 @@ require "deprecation_collector"
 # require "pry"
 # Pry.start
 
-# rubocop:disable Style/GlobalVars
-$redis = Redis.new
-DeprecationCollector.install do |instance|
-  instance.redis = $redis
-  instance.app_revision = "some_revision_in_console"
-  instance.count = false
-  instance.save_full_backtrace = true
-  instance.raise_on_deprecation = false
-  instance.write_interval = 1
-  instance.exclude_realms = []
-  instance.ignored_messages = []
-  instance.print_to_stderr = true
-end
+require_relative 'dev_env'
 
-puts "DeprecationCollector.instance prepared, shorthand = $inst"
 $inst = DeprecationCollector.instance
+puts "DeprecationCollector.instance prepared, shorthand = $inst"
 # rubocop:enable Style/GlobalVars
 
 require "irb"
