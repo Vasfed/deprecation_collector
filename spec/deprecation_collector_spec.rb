@@ -9,19 +9,6 @@ RSpec.describe DeprecationCollector do
   let(:backtrace) { caller_locations }
   let(:redis) { described_class.instance.redis }
 
-  before(:all) do # rubocop:disable RSpec/BeforeAfterAll
-    DeprecationCollector.install do |instance| # rubocop:disable RSpec/DescribedClass
-      instance.redis = Redis.new
-      instance.app_revision = "somerevisionabc123"
-      instance.app_root = File.expand_path("..", __dir__)
-      instance.count = false
-      instance.save_full_backtrace = true
-      instance.context_saver do
-        { some: "context" }
-      end
-    end
-  end
-
   before do
     # если вдруг в тестах что-то насобиралось почему-то
     collector.write_to_redis(force: true) # сбрасываем кеш процесса
