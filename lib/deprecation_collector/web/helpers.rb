@@ -38,6 +38,13 @@ class DeprecationCollector
         return unless defined?(ActiveSupport::Deprecation)
         -> { ActiveSupport::Deprecation.warn("Test deprecation") } []
       end
+
+      def current_color_theme
+        return 'dark' if params['dark']
+        return 'light' if params['light']
+        return 'dark' if request.get_header('HTTP_Sec_CH_Prefers_Color_Scheme').to_s.downcase.include?("dark")
+        'auto'
+      end
     end
   end
 end

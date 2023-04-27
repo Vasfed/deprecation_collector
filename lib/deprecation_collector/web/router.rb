@@ -154,7 +154,13 @@ class DeprecationCollector
           html = render_template(template) if template
           html = render_template(layout) { html } if layout
 
-          return [status, {"content-type" => "text/html"}, [html.to_s]] if html
+          color_scheme_headers = {
+            'Accept-CH' => 'Sec-CH-Prefers-Color-Scheme',
+            'Vary' => 'Sec-CH-Prefers-Color-Scheme',
+            'Critical-CH' => 'Sec-CH-Prefers-Color-Scheme'
+          }
+
+          return [status, {"content-type" => "text/html"}.merge(color_scheme_headers), [html.to_s]] if html
         end
 
         VIEW_PATH = "#{__dir__}/views"

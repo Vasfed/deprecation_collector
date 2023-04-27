@@ -3,6 +3,9 @@
 
 require_relative 'dev_env'
 require 'rack'
+
+ENV['DEPRECATION_COLLECTOR_RELOAD_WEB_TEMPLATES'] ||= 'true'
+
 require 'deprecation_collector/web'
 
 app = Rack::Builder.new do

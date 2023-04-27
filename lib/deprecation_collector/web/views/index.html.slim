@@ -1,4 +1,4 @@
-header
+header.mb-3
   h1 Deprecations
 
   a.btn.btn-primary>(data-method="post" href=deprecation_path(:trigger) rel="nofollow") Trigger a couple
@@ -27,7 +27,7 @@ main
     - total = 0
     - @deprecations.each do |deprecation|
       - total += 1
-      tr(data-digest=deprecation[:digest])
+      tr data-digest=deprecation[:digest]
         td
           a(href=deprecation_path(deprecation[:digest]))= deprecation[:count]
           br
@@ -47,9 +47,8 @@ main
             msg = deprecation[:message]
             delete_prefixes = Gem.path + [defined?(Rails) && Rails.root.to_s].compact
             delete_prefixes.each { |path| msg.gsub!(path, '') }
-          .card.text-dark.bg-light
-            pre.pre-scrollable(style="overflow: auto; max-width: 700px; max-height: 200px; font-size: 11px")
-              code = msg.delete_prefix("DEPRECATION WARNING: ")
+          pre.pre-scrollable.card.p-1(style="overflow: auto; max-width: 700px; max-height: 200px; font-size: 11px")
+            code = msg.delete_prefix("DEPRECATION WARNING: ")
           - if deprecation.dig(:notes, :comment)
             = deprecation.dig(:notes, :comment)
 
@@ -57,7 +56,7 @@ main
             .small.controller = deprecation.dig(:context, :action)
           - elsif deprecation.dig(:context, :params, :controller)
             .small.controller = deprecation.dig(:context, :params).slice(:controller, :action).values.join('#')
-        td
+        td.small
           - if deprecation[:gem_traceline]
             = deprecation[:gem_traceline]
             <br>

@@ -22,7 +22,7 @@ class DeprecationCollector
       end
 
       root do # index
-        @deprecations = collector_instance.read_each.to_a
+        @deprecations = collector_instance.read_each.to_a.compact
         @deprecations = @deprecations.sort_by { |dep| dep[:message] } unless params[:sort] == '0'
 
         if params[:reject]
