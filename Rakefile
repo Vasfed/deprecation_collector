@@ -5,9 +5,11 @@ require "rspec/core/rake_task"
 
 RSpec::Core::RakeTask.new(:spec)
 
-require "rubocop/rake_task"
-
-RuboCop::RakeTask.new
+begin
+  require "rubocop/rake_task"
+  RuboCop::RakeTask.new
+rescue LoadError
+end
 
 task default: %i[spec rubocop]
 
@@ -23,4 +25,5 @@ task :precompile_templates do
   end
 end
 
+Rake::Task[:spec].enhance [:precompile_templates]
 Rake::Task[:build].enhance [:precompile_templates]

@@ -30,4 +30,5 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "redis", ">= 3.0"
   spec.add_development_dependency "appraisal"
+  spec.add_development_dependency "rack-test"
 end

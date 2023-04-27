@@ -230,6 +230,7 @@ DEPENDENCIES
   deprecation_collector!
   fakeredis
   rack
+  rack-test
   rails (~> 6.0.0)
   rake (~> 13.0)
   redis (~> 4.8)
