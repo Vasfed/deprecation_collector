@@ -8,6 +8,12 @@ require_relative 'web/application'
 
 class DeprecationCollector
   class Web
+    attr_accessor :import_enabled
+
+    def initialize(import_enabled: nil)
+      @import_enabled = import_enabled
+    end
+
     def self.call(env)
       @app ||= new
       @app.call(env)
@@ -23,10 +29,11 @@ class DeprecationCollector
 
     private
     def build
+      web = self
       ::Rack::Builder.new do
         # use Rack::Static etc goes here
 
-        run Web::Application.new
+        run Web::Application.new(web)
       end
     end
   end

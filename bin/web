@@ -10,7 +10,7 @@ require 'deprecation_collector/web'
 
 app = Rack::Builder.new do
   map '/deprecations' do
-    run DeprecationCollector::Web.new
+    run DeprecationCollector::Web.new(import_enabled: true)
   end
 
   map '/robots.txt' do

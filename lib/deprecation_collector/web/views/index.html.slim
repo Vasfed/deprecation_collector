@@ -84,7 +84,11 @@ main
           p Looks like there're no deprecations (or workers have not yet wrote to redis)
           p
             ' You can try
-            a(href=deprecation_path(:trigger) data-method="post" rel="nofollow") trigger a couple
+            a href=deprecation_path(:trigger) data-method="post" rel="nofollow" trigger a couple
+            - if import_enabled?
+              |> , or
+              a> href=import_deprecations_path import
+
 
 footer
   - if total > 3

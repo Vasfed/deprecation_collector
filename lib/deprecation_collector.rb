@@ -183,7 +183,19 @@ class DeprecationCollector
   end
 
   def dump
-    read_each.to_a.to_json
+    read_each.to_a.compact.to_json
+  end
+
+  def import_dump(json)
+    dump = JSON.parse(json)
+    # TODO: some checks
+
+    digests = dump.map { |dep| dep["digest"] }
+    raise 'need digests' unless digests.none?(&:nil?)
+
+    dump_hash = dump.map { |dep| [dep.delete('digest'), dep] }.to_h
+
+    @redis.mapped_hmset("deprecations:data", dump_hash.transform_values(&:to_json))
   end
 
   def read_each

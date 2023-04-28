@@ -1,0 +1,12 @@
+header
+  h1 Import dump
+
+main
+  form method="post" action=import_deprecations_path enctype="multipart/form-data"
+    .mb-3
+      label.form-label> for="file" Choose a JSON file to upload:
+      input.form-comtrol type="file" name="file" id="file"
+    .mb-3
+      button.btn.btn-primary> type="submit" Upload
+      a.btn.btn-secondary> href=dump_deprecations_path Dump
+      a.btn.btn-secondary> href=deprecations_path Back

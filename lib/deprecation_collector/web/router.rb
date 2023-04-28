@@ -46,7 +46,7 @@ class DeprecationCollector
         end
       end
 
-      def call(env)
+      def call(env, application=nil)
         action = match(env)
         unless action
           return [
@@ -57,7 +57,7 @@ class DeprecationCollector
         end
 
         resp = catch(:halt) do
-          action.call(env)
+          action.call(env, application)
         ensure
         end
 
@@ -116,7 +116,8 @@ class DeprecationCollector
           @block = block
         end
 
-        def call(env)
+        def call(env, application)
+          @web = application.web
           instance_exec(&@block)
         end
 
@@ -134,8 +135,8 @@ class DeprecationCollector
                         .merge!(route_params.transform_keys(&:to_s))
         end
 
-        def halt(res)
-          throw :halt, [res, {"content-type" => "text/plain"}, [res.to_s]]
+        def halt(res, content=nil)
+          throw :halt, [res, {"content-type" => "text/plain"}, [content || res.to_s]]
         end
 
         def redirect_to(location)
@@ -145,7 +146,10 @@ class DeprecationCollector
         def render(plain: nil, html: nil, json: nil, erb: nil, slim: nil, status: 200, locals: nil, layout: 'layout.html.slim')
           raise ArgumentError, "provide exactly one render format" unless [plain, html, json, erb, slim].compact.size == 1
 
-          return [status, {"content-type" => "application/json"}, [JSON.generate(json)]] if json
+          if json
+            json = JSON.generate(json) unless json.is_a?(String)
+            return [status, {"content-type" => "application/json"}, [json]]
+          end
           return [status, {"content-type" => "text/plain"}, [plain.to_s]] if plain
 
           _define_locals(locals) if locals

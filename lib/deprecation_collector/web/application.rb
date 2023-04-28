@@ -10,7 +10,9 @@ class DeprecationCollector
       extend Web::Router
       helpers Helpers
 
-      def initialize
+      attr_reader :web
+      def initialize(web)
+        @web = web
         unless defined?(Temple::Utils) || ENV['DEPRECATION_COLLECTOR_RELOAD_WEB_TEMPLATES']
           # used for escaping in compiled slim templates
           require_relative 'utils'
@@ -18,7 +20,7 @@ class DeprecationCollector
       end
 
       def call(env)
-        self.class.call(env)
+        self.class.call(env, self)
       end
 
       root do # index
@@ -37,7 +39,19 @@ class DeprecationCollector
       end
 
       get '/dump.json' do
-        render json: collector_instance.read_each.to_a
+        render json: collector_instance.dump
+      end
+
+      get '/import' do
+        return "Import not enabled" unless import_enabled?
+
+        render slim: "import.html"
+      end
+
+      post '/import' do
+        halt 422, "need multipart json file" unless env['CONTENT_TYPE']&.start_with?('multipart/form-data') && params.dig(:file, :tempfile)
+        collector_instance.import_dump(File.read(params[:file][:tempfile]))
+        redirect_to deprecations_path
       end
 
       get '/:id' do # show

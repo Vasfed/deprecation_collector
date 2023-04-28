@@ -1,3 +1,7 @@
+== 0.4.0
+- a bit better ui
+- simple import/export
+
 == 0.3.0
 - simple web ui (mountable rack app)
 

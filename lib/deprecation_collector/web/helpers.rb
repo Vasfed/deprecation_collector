@@ -7,6 +7,10 @@ class DeprecationCollector
         @collector_instance || DeprecationCollector.instance
       end
 
+      def import_enabled?
+        @web.import_enabled
+      end
+
       def root_path
         # request.base_url ?
         "#{env["SCRIPT_NAME"]}/"
@@ -30,6 +34,14 @@ class DeprecationCollector
 
       def disable_deprecations_path
         "#{root_path}disable"
+      end
+
+      def dump_deprecations_path
+        "#{root_path}dump.json"
+      end
+
+      def import_deprecations_path
+        "#{root_path}import"
       end
 
       def trigger_kwargs_error_warning(foo: nil); end
