@@ -13,6 +13,14 @@ app = Rack::Builder.new do
     run DeprecationCollector::Web.new
   end
 
+  map '/robots.txt' do
+    run proc { [200, {'Content-Type' => 'text/plain'}, ["User-agent: *\nDisallow: *"]] }
+  end
+
+  map '/favicon.ico' do
+    run proc { [200, {'Content-Type' => 'image/x-icon'}, [""]] }
+  end
+
   map '/' do
     run proc { |env|
       [200, {'Content-Type' => 'text/html'}, [

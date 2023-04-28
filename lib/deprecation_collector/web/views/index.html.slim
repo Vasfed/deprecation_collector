@@ -29,26 +29,27 @@ main
       - total += 1
       tr data-digest=deprecation[:digest]
         td
-          a(href=deprecation_path(deprecation[:digest]))= deprecation[:count]
+          a href=deprecation_path(deprecation[:digest]) = deprecation[:count]
           br
-          - if deprecation[:message].include?("Using the last argument as keyword parameters is deprecated") || \
-               deprecation[:message].include?("Passing the keyword argument as the last hash parameter is deprecated")
-            .badge.bg-secondary> kwargs
-          - if deprecation[:message].include?("trigger_kwargs_error_warning") || \
-               deprecation[:message].include?("trigger_rails_deprecation")
-            .badge.bg-success> test
-          - if deprecation[:realm] && deprecation[:realm] != 'rails'
-            .badge.bg-secondary>= deprecation[:realm]
-          - deprecation.dig(:notes, :tags)&.each do |tag|
-            .badge.bg-secondary> = tag
+          - deprecation_tags(deprecation).each_pair do |tag, cls|
+            .badge> class=cls = tag
 
         td
           ruby:
             msg = deprecation[:message]
             delete_prefixes = Gem.path + [defined?(Rails) && Rails.root.to_s].compact
             delete_prefixes.each { |path| msg.gsub!(path, '') }
-          pre.pre-scrollable.card.p-1(style="overflow: auto; max-width: 700px; max-height: 200px; font-size: 11px")
-            code = msg.delete_prefix("DEPRECATION WARNING: ")
+            msg.delete_prefix! deprecation[:gem_traceline].gsub(/:in .+/, ':') if deprecation[:gem_traceline]
+            msg.delete_prefix! deprecation[:app_traceline].gsub(/:in .+/, ':') if deprecation[:app_traceline]
+            msg.strip!
+            msg.delete_prefix!("DEPRECATION WARNING: ")
+            msg.delete_prefix!("warning: ")
+
+          - if msg.lines.size > 2
+            pre.pre-scrollable.p-1(style="overflow: auto; max-width: 700px; max-height: 200px; font-size: 11px")
+              code = msg
+          - else
+            .small = msg
           - if deprecation.dig(:notes, :comment)
             = deprecation.dig(:notes, :comment)
 
@@ -56,14 +57,21 @@ main
             .small.controller = deprecation.dig(:context, :action)
           - elsif deprecation.dig(:context, :params, :controller)
             .small.controller = deprecation.dig(:context, :params).slice(:controller, :action).values.join('#')
+
         td.small
           - if deprecation[:gem_traceline]
-            = deprecation[:gem_traceline]
-            <br>
+            .gem_location
+              - location, function = deprecation[:gem_traceline].split(':in `', 2)
+              - full_gemname = location.delete_prefix('/gems/').gsub(%r{/.*}, '')
+              - location_in_gem = location.delete_prefix("/gems/#{full_gemname}/")
+              i>= full_gemname
+              code.code_location> data-copy-value=location_in_gem = location_in_gem.delete_prefix('lib/')
+              i= function.delete_suffix("'")
           - if deprecation[:app_traceline]
-            - location, function = deprecation[:app_traceline].split(':in `', 2)
-            code.code_location>(style="cursor: pointer") = location
-            = function.delete_suffix("'")
+            .app_location
+              - location, function = deprecation[:app_traceline].split(':in `', 2)
+              code.code_location>= location
+              i= function.delete_suffix("'")
         td
           .small.ruby = deprecation[:ruby_version]
           .small.rails = deprecation[:rails_version]
@@ -72,8 +80,8 @@ main
             i.bi.bi-trash
     - if total.zero?
       tr
-        td(colspan=4)
-          p Looks like there're no deprecations
+        td colspan=4
+          p Looks like there're no deprecations (or workers have not yet wrote to redis)
           p
             ' You can try
             a(href=deprecation_path(:trigger) data-method="post" rel="nofollow") trigger a couple
@@ -82,11 +90,17 @@ footer
   - if total > 3
     => total
     ' deprecations
+css:
+  .code_location {
+    cursor: pointer;
+  }
 
 javascript:
   document.querySelectorAll('.code_location').forEach(function(elem){
     elem.addEventListener('click', function () {
-      console.log("Copying", elem.innerText)
-      navigator.clipboard.writeText(elem.innerText);
+      let textToCopy = elem.getAttribute('data-copy-value');
+      if(!textToCopy) textToCopy = elem.innerText;
+      console.log("Copying", textToCopy)
+      navigator.clipboard.writeText(textToCopy);
     }, false);
   });

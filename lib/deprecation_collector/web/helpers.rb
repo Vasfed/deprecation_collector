@@ -45,6 +45,20 @@ class DeprecationCollector
         return 'dark' if request.get_header('HTTP_Sec_CH_Prefers_Color_Scheme').to_s.downcase.include?("dark")
         'auto'
       end
+
+      def deprecation_tags(deprecation)
+        {}.tap do |tags|
+          tags[:kwargs] = 'bg-secondary' if deprecation[:message].include?("Using the last argument as keyword parameters is deprecated") ||
+                                            deprecation[:message].include?("Passing the keyword argument as the last hash parameter is deprecated")
+
+          tags[:test] = 'bg-success' if deprecation[:message].include?("trigger_kwargs_error_warning") ||
+                                        deprecation[:message].include?("trigger_rails_deprecation")
+            
+          tags[deprecation[:realm]] = 'bg-secondary' if deprecation[:realm] && deprecation[:realm] != 'rails'
+
+          deprecation.dig(:notes, :tags)&.each { |tag| tags[tag] = 'bg-secondary' }
+        end
+      end
     end
   end
 end
