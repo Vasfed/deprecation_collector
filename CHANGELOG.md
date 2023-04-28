@@ -1,3 +1,6 @@
+== 0.3.0
+- simple web ui (mountable rack app)
+
 == 0.2.0
 - ability to add custom deprecation fingerprint (for example - controller+action), use `config.fingerprinter`
 
