@@ -1,13 +1,16 @@
+# frozen_string_literal: true
 
 begin
-  require 'cgi/escape'
+  # this is stdgem in ruby 2.7+
+  require "cgi/escape"
 rescue LoadError
+  # optional dependency not present
 end
 
 module Temple
   # @api public
   module Utils
-    extend self
+    extend self # rubocop:disable Style/ModuleFunction
 
     # Returns an escaped copy of `html`.
     # Strings which are declared as html_safe are not escaped.
@@ -31,11 +34,11 @@ module Temple
       # Used by escape_html
       # @api private
       ESCAPE_HTML = {
-        '&'  => '&amp;',
-        '"'  => '&quot;',
-        '\'' => '&#39;',
-        '<'  => '&lt;',
-        '>'  => '&gt;'
+        "&" => "&amp;",
+        '"' => "&quot;",
+        "'" => "&#39;",
+        "<" => "&lt;",
+        ">" => "&gt;"
       }.freeze
 
       ESCAPE_HTML_PATTERN = Regexp.union(*ESCAPE_HTML.keys)

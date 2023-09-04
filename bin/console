@@ -8,11 +8,10 @@
 # require "pry"
 # Pry.start
 
-require_relative 'dev_env'
+require_relative "dev_env"
 
-$inst = DeprecationCollector.instance
+$inst = DeprecationCollector.instance # rubocop:disable Style/GlobalVars
 puts "DeprecationCollector.instance prepared, shorthand = $inst"
-# rubocop:enable Style/GlobalVars
 
 require "irb"
 IRB.start(__FILE__)

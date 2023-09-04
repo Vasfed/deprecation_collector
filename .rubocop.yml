@@ -10,6 +10,7 @@ AllCops:
   SuggestExtensions: false
   Exclude:
     - gemfiles/*
+    - lib/deprecation_collector/web/views/*.template.rb
 
 Style/StringLiterals:
   Enabled: true
@@ -30,3 +31,4 @@ Metrics/PerceivedComplexity: { Max: 9 }
 
 RSpec/ExampleLength: { Enabled: false }
 RSpec/MultipleExpectations: { Enabled: false }
+RSpec/MessageSpies: { Enabled: false }

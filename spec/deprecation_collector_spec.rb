@@ -310,7 +310,7 @@ RSpec.describe DeprecationCollector do
         expect do
           collector.collect("test")
           collector.write_to_redis(force: true)
-        end.to change { redis.hgetall("deprecations:counter").values }.to([(count+1).to_s])
+        end.to change { redis.hgetall("deprecations:counter").values }.to([(count + 1).to_s])
       end
     end
   end

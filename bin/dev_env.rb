@@ -3,10 +3,9 @@
 require "bundler/setup"
 require "deprecation_collector"
 
-# rubocop:disable Style/GlobalVars
-$redis = Redis.new
+$redis = Redis.new # rubocop:disable Style/GlobalVars
 DeprecationCollector.install do |instance|
-  instance.redis = $redis
+  instance.redis = $redis # rubocop:disable Style/GlobalVars
   instance.app_revision = "some_revision_in_console"
   instance.count = false
   instance.save_full_backtrace = true

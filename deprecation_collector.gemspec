@@ -25,7 +25,7 @@ Gem::Specification.new do |spec|
       (f == __FILE__) || f.match(%r{\A(?:(?:bin|test|spec|features)/|\.(?:git|travis|circleci)|appveyor)}) ||
         f.match(%r{\Alib/deprecation_collector/web/views/.+\.slim\z})
     end
-  end + Dir['lib/deprecation_collector/web/views/*.slim'].map { |template| template.sub(/\.slim\z/, '.template.rb') }
+  end + Dir["lib/deprecation_collector/web/views/*.slim"].map { |template| template.sub(/\.slim\z/, ".template.rb") }
   spec.require_paths = ["lib"]
 
   spec.add_dependency "redis", ">= 3.0"

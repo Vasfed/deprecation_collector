@@ -1,29 +1,29 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require_relative 'dev_env'
-require 'rack'
+require_relative "dev_env"
+require "rack"
 
-ENV['DEPRECATION_COLLECTOR_RELOAD_WEB_TEMPLATES'] ||= 'true'
+ENV["DEPRECATION_COLLECTOR_RELOAD_WEB_TEMPLATES"] ||= "true"
 
-require 'deprecation_collector/web'
+require "deprecation_collector/web"
 
 app = Rack::Builder.new do
-  map '/deprecations' do
+  map "/deprecations" do
     run DeprecationCollector::Web.new(import_enabled: true)
   end
 
-  map '/robots.txt' do
-    run proc { [200, {'Content-Type' => 'text/plain'}, ["User-agent: *\nDisallow: *"]] }
+  map "/robots.txt" do
+    run proc { [200, { "Content-Type" => "text/plain" }, ["User-agent: *\nDisallow: *"]] }
   end
 
-  map '/favicon.ico' do
-    run proc { [200, {'Content-Type' => 'image/x-icon'}, [""]] }
+  map "/favicon.ico" do
+    run proc { [200, { "Content-Type" => "image/x-icon" }, [""]] }
   end
 
-  map '/' do
-    run proc { |env|
-      [200, {'Content-Type' => 'text/html'}, [
+  map "/" do
+    run proc { |_env|
+      [200, { "Content-Type" => "text/html" }, [
         'Hello from Deprecation collector dev server<br>See <a href="/deprecations">Deprecations</a>'
       ]]
     }

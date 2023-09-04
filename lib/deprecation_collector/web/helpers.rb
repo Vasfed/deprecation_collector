@@ -2,6 +2,7 @@
 
 class DeprecationCollector
   class Web
+    # :nodoc:
     module Helpers
       def collector_instance
         @collector_instance || DeprecationCollector.instance
@@ -17,11 +18,11 @@ class DeprecationCollector
       end
 
       def current_path
-        @current_path ||= request.path_info.gsub(/^\//, "")
+        @current_path ||= request.path_info.gsub(%r{^/}, "")
       end
 
       def deprecations_path
-        "#{root_path}"
+        root_path # /
       end
 
       def deprecation_path(id)
@@ -48,27 +49,37 @@ class DeprecationCollector
 
       def trigger_rails_deprecation
         return unless defined?(ActiveSupport::Deprecation)
+
         -> { ActiveSupport::Deprecation.warn("Test deprecation") } []
       end
 
       def current_color_theme
-        return 'dark' if params['dark']
-        return 'light' if params['light']
-        return 'dark' if request.get_header('HTTP_Sec_CH_Prefers_Color_Scheme').to_s.downcase.include?("dark")
-        'auto'
+        return "dark" if params["dark"]
+        return "light" if params["light"]
+        return "dark" if request.get_header("HTTP_Sec_CH_Prefers_Color_Scheme").to_s.downcase.include?("dark")
+
+        "auto"
+      end
+
+      def detect_tag(deprecation)
+        msg = deprecation[:message]
+        return :kwargs if msg.include?("Using the last argument as keyword parameters is deprecated") ||
+                          msg.include?("Passing the keyword argument as the last hash parameter is deprecated")
+        return :test if msg.include?("trigger_kwargs_error_warning") || msg.include?("trigger_rails_deprecation")
       end
 
       def deprecation_tags(deprecation)
-        {}.tap do |tags|
-          tags[:kwargs] = 'bg-secondary' if deprecation[:message].include?("Using the last argument as keyword parameters is deprecated") ||
-                                            deprecation[:message].include?("Passing the keyword argument as the last hash parameter is deprecated")
+        tags = Set.new
+        if (detected_tag = detect_tag(deprecation))
+          tags << detected_tag
+        end
+        tags << deprecation[:realm] if deprecation[:realm] && deprecation[:realm] != "rails"
+        tags.merge(deprecation.dig(:notes, :tags) || [])
 
-          tags[:test] = 'bg-success' if deprecation[:message].include?("trigger_kwargs_error_warning") ||
-                                        deprecation[:message].include?("trigger_rails_deprecation")
-            
-          tags[deprecation[:realm]] = 'bg-secondary' if deprecation[:realm] && deprecation[:realm] != 'rails'
+        tags.to_h do |tag|
+          next [tag, "bg-success"] if tag == :test
 
-          deprecation.dig(:notes, :tags)&.each { |tag| tags[tag] = 'bg-secondary' }
+          [tag, "bg-secondary"]
         end
       end
     end

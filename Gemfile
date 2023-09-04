@@ -20,14 +20,14 @@ unless defined?(Appraisal)
   end
 
   gem "rails", "~>6.0.0"
-  gem 'simplecov'
+  gem "simplecov"
 end
 
 gem "fakeredis"
 gem "redis", "~>4.8"
 
 # for web tests
-gem 'rack'
-gem 'webrick'
+gem "rack"
+gem "webrick"
 
-gem 'slim' # not used in production, for compiling templates
+gem "slim" # not used in production, for compiling templates

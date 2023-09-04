@@ -14,8 +14,8 @@ rescue LoadError
   puts "No rails"
 end
 
-if ENV['COVERAGE']
-  require 'simplecov'
+if ENV["COVERAGE"]
+  require "simplecov"
   SimpleCov.start do
     add_group("Lib") { |src| !src.filename.include?("lib/deprecation_collector/web") }
     add_group "Web", "lib/deprecation_collector/web"
@@ -40,9 +40,10 @@ RSpec.configure do |config|
   end
 
   config.before(:all) do # rubocop:disable RSpec/BeforeAfterAll
+    # this is run before each spec file
     $redis ||= Redis.new # rubocop:disable Style/GlobalVars
-    DeprecationCollector.install do |instance| # rubocop:disable RSpec/DescribedClass
-      instance.redis = $redis # Redis.new
+    DeprecationCollector.install do |instance|
+      instance.redis = $redis # rubocop:disable Style/GlobalVars
       instance.app_revision = "somerevisionabc123"
       instance.app_root = File.expand_path("..", __dir__)
       instance.count = false

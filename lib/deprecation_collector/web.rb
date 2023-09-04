@@ -4,9 +4,10 @@ require "erb"
 require "rack/content_length"
 require "rack/builder"
 
-require_relative 'web/application'
+require_relative "web/application"
 
 class DeprecationCollector
+  # rack app with a html interface to deprecation collector with a persistent storage like redis
   class Web
     attr_accessor :import_enabled
 
@@ -28,6 +29,7 @@ class DeprecationCollector
     end
 
     private
+
     def build
       web = self
       ::Rack::Builder.new do
