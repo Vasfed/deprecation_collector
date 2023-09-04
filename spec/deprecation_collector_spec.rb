@@ -7,7 +7,7 @@ RSpec.describe DeprecationCollector do
 
   let(:message) { "some message" }
   let(:backtrace) { caller_locations }
-  let(:redis) { described_class.instance.redis }
+  let(:redis) { described_class.instance.storage.redis }
 
   before do
     # если вдруг в тестах что-то насобиралось почему-то
@@ -61,6 +61,21 @@ RSpec.describe DeprecationCollector do
       expect(item).to include(rails_version: Rails.version) if defined?(Rails)
 
       expect { collector.flush_redis }.to change { collector.read_each.to_a }.to([])
+    end
+
+    context "when disabled in redis just before write" do
+      around do |ex|
+        ex.run
+      ensure
+        collector.enable
+      end
+
+      it "disables self" do
+        redis.set("deprecations:enabled", "false")
+        Timecop.travel(Time.now + 1200) do # 20.minutes.from_now
+          expect { collector.collect(message, backtrace) }.to change(collector, :enabled?).from(true).to(false)
+        end
+      end
     end
 
     it "from activesupport" do
@@ -295,9 +310,14 @@ RSpec.describe DeprecationCollector do
         expect do
           collector.collect("test")
           collector.write_to_redis(force: true)
-        end.to change { $redis.hgetall("deprecations:counter").values }.to([(count+1).to_s])
+        end.to change { redis.hgetall("deprecations:counter").values }.to([(count+1).to_s])
       end
     end
+  end
+
+  it "#delete_deprecations" do
+    expect(collector.storage).to receive(:delete).with("abc123")
+    collector.delete_deprecations("abc123")
   end
 
   describe "#cleanup" do
