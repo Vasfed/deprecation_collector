@@ -25,8 +25,10 @@ main
       th Ruby/Rails
 
     - total = 0
+    - by_realm = Hash.new(0)
     - @deprecations.each do |deprecation|
       - total += 1
+      - by_realm[deprecation[:realm]] += 1
       tr data-digest=deprecation[:digest]
         td
           a href=deprecation_path(deprecation[:digest]) = deprecation[:count]
@@ -49,14 +51,14 @@ main
             pre.pre-scrollable.p-1(style="overflow: auto; max-width: 700px; max-height: 200px; font-size: 11px")
               code = msg
           - else
-            .small = msg
+            .msg = msg
           - if deprecation.dig(:notes, :comment)
             = deprecation.dig(:notes, :comment)
 
           - if deprecation.dig(:context, :action)
-            .small.controller = deprecation.dig(:context, :action)
+            i.small.controller = deprecation.dig(:context, :action)
           - elsif deprecation.dig(:context, :params, :controller)
-            .small.controller = deprecation.dig(:context, :params).slice(:controller, :action).values.join('#')
+            i.small.controller = deprecation.dig(:context, :params).slice(:controller, :action).values.join('#')
 
         td.small
           - if deprecation[:gem_traceline]
@@ -94,6 +96,14 @@ footer
   - if total > 3
     => total
     ' deprecations
+  - by_realm.each_pair do |realm, count|
+    a.btn.btn-sm.btn-outline-secondary> href="?realm=#{realm}"
+      => realm
+      .badge> class=(count == 0 ? 'bg-success' : 'bg-secondary') = count
+  - if params[:realm] && params[:realm] != ''
+    a.btn.btn-sm.btn-outline-primary> href="?realm="
+      ' Other realms    
+
 css:
   .code_location {
     cursor: pointer;

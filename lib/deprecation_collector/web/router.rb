@@ -40,7 +40,7 @@ class DeprecationCollector
         path_info = "/" if path_info == "" # some buggy servers may pass empty root path
 
         @routes[request_method.upcase]&.find do |route|
-          params = route.match(request_method, path_info)
+          params = route.match(request_method.upcase, path_info)
           next unless params
 
           env[ROUTE_PARAMS] = params
@@ -98,6 +98,7 @@ class DeprecationCollector
         end
 
         def match(request_method, path)
+          # this is actually not needed because of groupping by method, but just in case:
           return unless self.request_method == request_method
 
           case matcher

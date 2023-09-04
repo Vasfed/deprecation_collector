@@ -2,6 +2,7 @@
 
 require "bundler/setup"
 require "deprecation_collector"
+require "securerandom"
 
 $redis = Redis.new # rubocop:disable Style/GlobalVars
 DeprecationCollector.install do |instance|
@@ -14,4 +15,10 @@ DeprecationCollector.install do |instance|
   instance.exclude_realms = []
   instance.ignored_messages = []
   instance.print_to_stderr = true
+  instance.context_saver do
+    {
+      request_id: SecureRandom.hex,
+      action: "some/controller/path#action_name"
+    }
+  end
 end
