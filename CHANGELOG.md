@@ -1,3 +1,10 @@
+== 0.5.0
+- more work on ui
+- refactored to separate deprecations storage from other logic
+- when redis is not provided - print all messages to stderr
+- added `key_prefix` option (default `'deprecations'`, location may change in the future) to allow multiple independent apps to write to one redis
+- added `app_name` option to record app name as separate field
+
 == 0.4.0
 - a bit better ui
 - simple import/export
