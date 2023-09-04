@@ -239,13 +239,15 @@ class DeprecationCollector
   end
 
   def cleanup
+    raise ArgumentError, "provide a block to filter deprecations" unless block_given?
+
     cursor = 0
     removed = total = 0
     loop do
       cursor, data_pairs = @redis.hscan("deprecations:data", cursor) # NB: some pages may be empty
       total += data_pairs.size
       removed += delete_deprecations(
-        data_pairs.to_h.select { |_digest, data| !block_given? || yield(JSON.parse(data, symbolize_names: true)) }.keys
+        data_pairs.to_h.select { |_digest, data| yield(JSON.parse(data, symbolize_names: true)) }.keys
       )
       break if cursor == "0"
     end

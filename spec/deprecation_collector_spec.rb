@@ -315,6 +315,10 @@ RSpec.describe DeprecationCollector do
       expect(collector.cleanup { |wrn| wrn[:message].include?(message) }).to eq "0 removed, 1 left"
       expect(collector.cleanup { |wrn| wrn[:message].include?("other message") }).to eq "1 removed, 0 left"
     end
+
+    it "requires a block" do
+      expect { collector.cleanup }.to raise_error(ArgumentError)
+    end
   end
 
   describe "#dump" do
