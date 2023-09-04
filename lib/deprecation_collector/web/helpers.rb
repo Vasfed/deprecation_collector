@@ -25,8 +25,8 @@ class DeprecationCollector
         root_path # /
       end
 
-      def deprecation_path(id)
-        "#{root_path}#{id}"
+      def deprecation_path(id, format: nil)
+        ["#{root_path}#{id}", format].compact.join('.')
       end
 
       def enable_deprecations_path

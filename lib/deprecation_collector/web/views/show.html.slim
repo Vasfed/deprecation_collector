@@ -7,6 +7,75 @@ header.mb-3
     | Delete
 
 main
-  .card.p-3
-    pre
-      code = @deprecation.pretty_inspect
+  dl.row
+    dt Message
+    dd
+      code= @deprecation[:message]
+    / dt.col-sm-3 First time
+    / dd.col-sm-9= @deprecation[:first_timestamp]&.yield_self { |time| Time.at(time) }
+    dt First time
+    dd= @deprecation[:first_timestamp]&.yield_self { |time| Time.at(time) }
+
+    - if @deprecation[:count] > 1
+      dt Count
+      dd= @deprecation[:count]
+
+    dt Realm
+    dd= @deprecation[:realm]
+
+    - if @deprecation[:ruby_version]
+      dt Ruby
+      dd= @deprecation[:ruby_version]
+    - if @deprecation[:rails_version]
+      dt Rails
+      dd= @deprecation[:rails_version]
+
+    - if @deprecation[:revision]
+      dt Revision
+      dd= @deprecation[:revision]
+    - if @deprecation[:hostname]
+      dt Hostname
+      dd= @deprecation[:hostname]
+
+    - if @deprecation[:context]
+      dt Context
+      dd
+        .card.p-3
+          pre
+            code = JSON.pretty_generate(@deprecation[:context])
+
+    - if @deprecation[:app_traceline]
+      dt App traceline
+      dd
+        - location, function = @deprecation[:app_traceline].split(':in `', 2)
+        code.code_location>= location
+        i= function.delete_suffix("'")
+
+    - if @deprecation[:gem_traceline]
+      dt Gem traceline
+      dd
+        - location, function = @deprecation[:gem_traceline].split(':in `', 2)
+        - full_gemname = location.delete_prefix('/gems/').gsub(%r{/.*}, '')
+        - location_in_gem = location.delete_prefix("/gems/#{full_gemname}/")
+        i>= full_gemname
+        code.code_location> data-copy-value=location_in_gem = location_in_gem.delete_prefix('lib/')
+        i= function.delete_suffix("'")
+
+    - if @deprecation[:full_backtrace]
+      dt Backtrace
+      dd
+        - @deprecation[:full_backtrace].each do |trace_line|
+          .trace-line
+            - location, function = trace_line.split(':in `', 2)
+            code.code_location>= location
+            i= function.delete_suffix("'")
+
+    - fields_to_reject = %i[message first_timestamp count realm app_traceline gem_traceline full_backtrace ruby_version rails_version context revision hostname digest_base digest].to_set
+    - additional_data = @deprecation.reject { |key,_val| fields_to_reject.include?(key) }
+    - if additional_data.size > 0
+      dt
+        ' Additional data
+        .card.p-3
+          pre
+            code = JSON.pretty_generate additional_data
+  a href=deprecation_path(params[:id], format: 'json') Raw json

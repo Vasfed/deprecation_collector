@@ -3,8 +3,6 @@
 require_relative "router"
 require_relative "helpers"
 
-require "pp" # for pretty_inspect
-
 class DeprecationCollector
   class Web
     # :nodoc:
@@ -60,7 +58,7 @@ class DeprecationCollector
       get "/:id.json" do # show
         @deprecation = collector_instance.read_one(params[:id])
         halt 404 unless @deprecation
-        render json: @deprecation.to_json
+        render json: JSON.pretty_generate(@deprecation)
       end
 
       get "/:id" do # show
