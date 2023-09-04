@@ -292,10 +292,8 @@ class DeprecationCollector
     return nil unless data
 
     data = JSON.parse(data, symbolize_names: true)
-    unless data.is_a?(Hash)
-      # this should not happen (this means broken Deprecation#to_json or some data curruption)
-      return nil
-    end
+    # this should not happen (this means broken Deprecation#to_json or some data curruption)
+    return nil unless data.is_a?(Hash)
 
     data[:digest] = digest
     data[:notes] = JSON.parse(notes, symbolize_names: true) if notes

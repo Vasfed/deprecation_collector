@@ -17,8 +17,10 @@ end
 if ENV['COVERAGE']
   require 'simplecov'
   SimpleCov.start do
-    add_group "Lib", "lib"
-    add_group "Tests", "spec"
+    add_group("Lib") { |src| !src.filename.include?("lib/deprecation_collector/web") }
+    add_group "Web", "lib/deprecation_collector/web"
+    # add_group "Tests", "spec"
+    add_filter "spec"
   end
 end
 
@@ -38,15 +40,13 @@ RSpec.configure do |config|
   end
 
   config.before(:all) do # rubocop:disable RSpec/BeforeAfterAll
+    $redis ||= Redis.new # rubocop:disable Style/GlobalVars
     DeprecationCollector.install do |instance| # rubocop:disable RSpec/DescribedClass
-      instance.redis = Redis.new
+      instance.redis = $redis # Redis.new
       instance.app_revision = "somerevisionabc123"
       instance.app_root = File.expand_path("..", __dir__)
       instance.count = false
       instance.save_full_backtrace = true
-      instance.context_saver do
-        { some: "context" }
-      end
     end
   end
 end

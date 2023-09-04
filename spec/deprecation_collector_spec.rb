@@ -16,6 +16,12 @@ RSpec.describe DeprecationCollector do
     collector.flush_redis(enable: true)
   end
 
+  it "singleton creation when not installed yet" do
+    described_class.instance_variable_set(:@instance, nil)
+    expect(described_class.instance).to be_instance_of(described_class)
+    described_class.instance_variable_set(:@instance, nil)
+  end
+
   describe "collection" do
     it "writing and reading redis" do
       allow(redis).to receive(:hincrby).and_call_original
@@ -60,6 +66,11 @@ RSpec.describe DeprecationCollector do
     it "from activesupport" do
       skip "testing without ActiveSupport" unless defined? ActiveSupport
 
+      expect do
+        # typically is set up in #install on app startup
+        collector.context_saver { { some: "context" } }
+      end.to change(collector, :context_saver)
+
       expect(described_class.send(:stock_activesupport_behavior)).to be_a(Symbol)
       allow(described_class).to receive(:stock_activesupport_behavior).and_return(:raise)
       expect do
@@ -79,6 +90,7 @@ RSpec.describe DeprecationCollector do
         realm: "rails"
       )
       expect(item[:gem_traceline]).to be_nil
+      expect(collector.context_saver).to be_present
       expect(item[:context]).to eq({ some: "context" })
       expect(item).not_to have_key(:gem_traceline)
     end
@@ -254,6 +266,40 @@ RSpec.describe DeprecationCollector do
     end
   end
 
+  context "when print_to_stderr enabled" do
+    around do |example|
+      old = collector.print_to_stderr
+      collector.print_to_stderr = true
+      example.run
+    ensure
+      collector.print_to_stderr = old
+    end
+
+    it "prints to stderr" do
+      expect($stderr).to receive(:puts).with(/DEPRECATION: /)
+      collector.collect("test stderr")
+    end
+  end
+
+  context "when count is enabled" do
+    around do |example|
+      old = collector.count
+      collector.count = true
+      example.run
+    ensure
+      collector.count = old
+    end
+
+    it "flushes count to redis" do
+      2.times do |count|
+        expect do
+          collector.collect("test")
+          collector.write_to_redis(force: true)
+        end.to change { $redis.hgetall("deprecations:counter").values }.to([(count+1).to_s])
+      end
+    end
+  end
+
   describe "#cleanup" do
     before do
       collector.collect(message, backtrace)
@@ -272,15 +318,29 @@ RSpec.describe DeprecationCollector do
   end
 
   describe "#dump" do
-    it "works" do
-      expect(collector.dump).to eq('[]')
+    it "dumps" do
+      expect(collector.dump).to eq("[]")
+    end
+
+    describe "import" do
+      let(:dump_json) do
+        [
+          {
+            digest: "lala",
+            foo: "bar"
+          }
+        ].to_json
+      end
+
+      it "import" do
+        expect { collector.import_dump(dump_json) }.to change { collector.read_each.to_a.size }.from(0).to(1)
+        expect(collector.read_one("lala")).to eq({ digest: "lala", foo: "bar" })
+      end
     end
   end
 
-  describe "enable/disable" do
-    it "works" do
-      expect { collector.disable }.to change(collector, :enabled_in_redis?).to(false)
-      expect { collector.enable }.to change(collector, :enabled_in_redis?).to(true)
-    end
+  it "enable/disable" do
+    expect { collector.disable }.to change(collector, :enabled_in_redis?).to(false)
+    expect { collector.enable }.to change(collector, :enabled_in_redis?).to(true)
   end
 end
