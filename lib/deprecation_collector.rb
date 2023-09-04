@@ -54,9 +54,9 @@ class DeprecationCollector
   # NB: count is expensive in production env (but possible if needed) - produces a lot of redis writes
   attr_accessor :raise_on_deprecation, :save_full_backtrace,
                 :exclude_realms,
-                :app_revision, :app_root,
+                :app_name, :app_revision, :app_root,
                 :print_to_stderr, :print_recurring
-  attr_reader :count, :write_interval, :write_interval_jitter
+  attr_reader :count, :write_interval, :write_interval_jitter, :key_prefix
   attr_writer :context_saver, :fingerprinter
 
   def initialize(mutex: nil)
@@ -86,7 +86,8 @@ class DeprecationCollector
 
     @storage ||= DeprecationCollector::Storage::Redis.new(val, mutex: @instance_mutex, count: count, # rubocop:disable Naming/MemoizedInstanceVariableName
                                                                write_interval: write_interval,
-                                                               write_interval_jitter: write_interval_jitter)
+                                                               write_interval_jitter: write_interval_jitter,
+                                                               key_prefix: key_prefix)
   end
 
   def count=(val)
@@ -102,6 +103,11 @@ class DeprecationCollector
   def write_interval_jitter=(val)
     storage.write_interval_jitter = val if storage.respond_to?(:write_interval_jitter)
     @write_interval_jitter = val
+  end
+
+  def key_prefix=(val)
+    storage.key_prefix = val
+    @key_prefix = val
   end
 
   def storage
@@ -234,6 +240,7 @@ class DeprecationCollector
 
     deprecation.context = context_saver.call if context_saver && allow_context
     deprecation.custom_fingerprint = fingerprinter.call(deprecation) if fingerprinter && allow_context
+    deprecation.app_name = app_name if app_name
 
     storage.store(deprecation)
   end

@@ -32,8 +32,10 @@ class DeprecationCollector
     class Redis < Base
       attr_accessor :write_interval, :write_interval_jitter, :redis, :count
 
-      def initialize(redis, mutex: nil, count: false, write_interval: 900, write_interval_jitter: 60)
+      def initialize(redis, mutex: nil, count: false, write_interval: 900, write_interval_jitter: 60,
+                            key_prefix: nil)
         super()
+        @key_prefix = key_prefix || "deprecations"
         @redis = redis
         @last_write_time = current_time
         @count = count
@@ -50,37 +52,37 @@ class DeprecationCollector
       end
 
       def enabled?
-        @redis.get("deprecations:enabled") != "false"
+        @redis.get(enabled_flag_key) != "false"
       end
 
       def enable
-        @redis.set("deprecations:enabled", "true")
+        @redis.set(enabled_flag_key, "true")
       end
 
       def disable
-        @redis.set("deprecations:enabled", "false")
+        @redis.set(enabled_flag_key, "false")
       end
 
       def delete(remove_digests)
         return 0 unless remove_digests.any?
 
         @redis.pipelined do |pipe|
-          pipe.hdel("deprecations:data", *remove_digests)
-          pipe.hdel("deprecations:notes", *remove_digests)
-          pipe.hdel("deprecations:counter", *remove_digests) if @count
+          pipe.hdel(data_hash_key, *remove_digests)
+          pipe.hdel(notes_hash_key, *remove_digests)
+          pipe.hdel(counter_hash_key, *remove_digests) if @count
         end.first
       end
 
       def clear(enable: false)
-        @redis.del("deprecations:data", "deprecations:counter", "deprecations:notes")
-        @redis.del("deprecations:enabled") if enable
+        @redis.del(data_hash_key, counter_hash_key, notes_hash_key)
+        @redis.del(enabled_flag_key) if enable
         @known_digests.clear
         @deprecations.clear
       end
 
       def fetch_known_digests
         # FIXME: use `.merge!`?
-        @known_digests.merge(@redis.hkeys("deprecations:data"))
+        @known_digests.merge(@redis.hkeys(data_hash_key))
       end
 
       def store(deprecation)
@@ -113,18 +115,18 @@ class DeprecationCollector
         return unless deprecations_to_flush.any?
 
         @known_digests.merge(deprecations_to_flush.keys)
-        @redis.mapped_hmset("deprecations:data", deprecations_to_flush.transform_values(&:to_json))
+        @redis.mapped_hmset(data_hash_key, deprecations_to_flush.transform_values(&:to_json))
       end
 
       def read_each
         cursor = 0
         loop do
-          cursor, data_pairs = @redis.hscan("deprecations:data", cursor)
+          cursor, data_pairs = @redis.hscan(data_hash_key, cursor)
 
           if data_pairs.any?
             data_pairs.zip(
-              @redis.hmget("deprecations:counter", data_pairs.map(&:first)),
-              @redis.hmget("deprecations:notes", data_pairs.map(&:first))
+              @redis.hmget(counter_hash_key, data_pairs.map(&:first)),
+              @redis.hmget(notes_hash_key, data_pairs.map(&:first))
             ).each do |(digest, data), count, notes|
               yield(digest, data, count, notes)
             end
@@ -137,22 +139,22 @@ class DeprecationCollector
         [
           digest,
           *@redis.pipelined do |pipe|
-            pipe.hget("deprecations:data", digest)
-            pipe.hget("deprecations:counter", digest)
-            pipe.hget("deprecations:notes", digest)
+            pipe.hget(data_hash_key, digest)
+            pipe.hget(counter_hash_key, digest)
+            pipe.hget(notes_hash_key, digest)
           end
         ]
       end
 
       def import(dump_hash)
-        @redis.mapped_hmset("deprecations:data", dump_hash.transform_values(&:to_json))
+        @redis.mapped_hmset(data_hash_key, dump_hash.transform_values(&:to_json))
       end
 
       def cleanup(&_block)
         cursor = 0
         removed = total = 0
         loop do
-          cursor, data_pairs = @redis.hscan("deprecations:data", cursor) # NB: some pages may be empty
+          cursor, data_pairs = @redis.hscan(data_hash_key, cursor) # NB: some pages may be empty
           total += data_pairs.size
           removed += delete(
             data_pairs.to_h.select { |_digest, data| yield(JSON.parse(data, symbolize_names: true)) }.keys
@@ -162,7 +164,28 @@ class DeprecationCollector
         "#{removed} removed, #{total - removed} left"
       end
 
+      def key_prefix=(val)
+        @enabled_flag_key = @data_hash_key = @counter_hash_key = @notes_hash_key = nil
+        @key_prefix = val
+      end
+
       protected
+
+      def enabled_flag_key
+        @enabled_flag_key ||= "#{@key_prefix}:enabled" # usually deprecations:enabled
+      end
+
+      def data_hash_key
+        @data_hash_key ||= "#{@key_prefix}:data" # usually deprecations:data
+      end
+
+      def counter_hash_key
+        @counter_hash_key ||= "#{@key_prefix}:counter" # usually deprecations:counter
+      end
+
+      def notes_hash_key
+        @notes_hash_key ||= "#{@key_prefix}:notes" # usually deprecations:notes
+      end
 
       def current_time
         return Time.zone.now if Time.respond_to?(:zone) && Time.zone
@@ -173,7 +196,7 @@ class DeprecationCollector
       def write_count_to_redis(deprecations_to_flush)
         @redis.pipelined do |pipe|
           deprecations_to_flush.each_pair do |digest, deprecation|
-            pipe.hincrby("deprecations:counter", digest, deprecation.occurences)
+            pipe.hincrby(counter_hash_key, digest, deprecation.occurences)
           end
         end
       end

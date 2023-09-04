@@ -4,7 +4,7 @@ class DeprecationCollector
   # :nodoc:
   class Deprecation
     attr_reader :message, :realm, :gem_traceline, :app_traceline, :occurences, :first_timestamp, :full_backtrace
-    attr_accessor :context, :custom_fingerprint
+    attr_accessor :context, :custom_fingerprint, :app_name
 
     CLEANUP_REGEXES = {
       # rails views generated methods names are unique per-worker
@@ -61,6 +61,7 @@ class DeprecationCollector
 
     def as_json(_options = {})
       {
+        app: app_name,
         message: message,
         realm: realm,
         app_traceline: app_traceline,
