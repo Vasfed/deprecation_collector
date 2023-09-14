@@ -6,15 +6,16 @@ header.mb-3
     i.bi.bi-trash
     ' Delete all
 
-  - if DeprecationCollector.instance.enabled_in_redis?
-    a.btn.btn-danger>(
-      data-method="delete" href=disable_deprecations_path rel="nofollow"
-      data-confirm="Sure? Will need to restart workers after enabling"
-      ) Disable
-  - else
-    a.btn.btn-secondary>(
-      data-method="post" href=enable_deprecations_path rel="nofollow"
-    ) Turn on (after workers restart)
+  - if DeprecationCollector.instance.storage.support_disabling?
+    - if DeprecationCollector.instance.storage.enabled?
+      a.btn.btn-danger>(
+        data-method="delete" href=disable_deprecations_path rel="nofollow"
+        data-confirm="Sure? Will need to restart workers after enabling"
+        ) Disable
+    - else
+      a.btn.btn-secondary>(
+        data-method="post" href=enable_deprecations_path rel="nofollow"
+      ) Turn on (after workers restart)
 
 main
   table.table.table-striped

@@ -364,7 +364,8 @@ RSpec.describe DeprecationCollector do
   end
 
   it "enable/disable" do
-    expect { collector.disable }.to change(collector, :enabled_in_redis?).to(false)
+    expect(collector.storage).to be_support_disabling
+    expect { collector.disable }.to change(collector.storage, :enabled?).to(false)
     expect { collector.enable }.to change(collector, :enabled_in_redis?).to(true)
   end
 end

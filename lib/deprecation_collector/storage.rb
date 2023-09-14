@@ -7,6 +7,8 @@ class DeprecationCollector
     # :nodoc:
     class Base
       # rubocop:disable Style/SingleLineMethods
+      def initialize(**); end
+      def support_disabling?; false; end
       def enabled?; true; end
       def enable; end
       def disable; end
@@ -16,6 +18,7 @@ class DeprecationCollector
 
       def delete(digests); end
       def clear(enable: false); end
+      def flush(**); end
 
       def store(_deprecation); raise("Not implemented"); end
       # rubocop:enable Style/SingleLineMethods
@@ -32,9 +35,9 @@ class DeprecationCollector
     class Redis < Base
       attr_accessor :write_interval, :write_interval_jitter, :redis, :count
 
-      def initialize(redis, mutex: nil, count: false, write_interval: 900, write_interval_jitter: 60,
+      def initialize(redis: nil, mutex: nil, count: false, write_interval: 900, write_interval_jitter: 60,
                             key_prefix: nil)
-        super()
+        super
         @key_prefix = key_prefix || "deprecations"
         @redis = redis
         @last_write_time = current_time
@@ -45,6 +48,10 @@ class DeprecationCollector
         @deprecations_mutex = mutex || Mutex.new
         @deprecations = {}
         @known_digests = Set.new
+      end
+
+      def support_disabling?
+        true
       end
 
       def unsent_deprecations

@@ -78,40 +78,46 @@ class DeprecationCollector
     self.count = false
     self.write_interval = 900 # 15.minutes
     self.write_interval_jitter = 60
+    self.key_prefix = "deprecations"
     @context_saver = nil
   end
 
   def redis=(val)
     raise ArgumentError, "redis should not be nil" unless val
-
-    @storage ||= DeprecationCollector::Storage::Redis.new(val, mutex: @instance_mutex, count: count, # rubocop:disable Naming/MemoizedInstanceVariableName
-                                                               write_interval: write_interval,
-                                                               write_interval_jitter: write_interval_jitter,
-                                                               key_prefix: key_prefix)
+    self.storage = DeprecationCollector::Storage::Redis unless storage.respond_to?(:redis=)
+    storage.redis = val
   end
 
   def count=(val)
-    storage.count = val if storage.respond_to?(:count)
+    storage.count = val if storage.respond_to?(:count=)
     @count = val
   end
 
   def write_interval=(val)
-    storage.write_interval = val if storage.respond_to?(:write_interval)
+    storage.write_interval = val if storage.respond_to?(:write_interval=)
     @write_interval = val
   end
 
   def write_interval_jitter=(val)
-    storage.write_interval_jitter = val if storage.respond_to?(:write_interval_jitter)
+    storage.write_interval_jitter = val if storage.respond_to?(:write_interval_jitter=)
     @write_interval_jitter = val
   end
 
   def key_prefix=(val)
-    storage.key_prefix = val
+    storage.key_prefix = val if storage.respond_to?(:key_prefix=)
     @key_prefix = val
   end
 
   def storage
     @storage ||= DeprecationCollector::Storage::StdErr.new
+  end
+
+  def storage=(val)
+    return @storage = val unless val.is_a?(Class)
+
+    @storage = val.new(mutex: @instance_mutex, count: count,
+                       write_interval: write_interval, write_interval_jitter: write_interval_jitter,
+                       key_prefix: key_prefix)
   end
 
   def ignored_messages=(val)
@@ -173,6 +179,7 @@ class DeprecationCollector
     storage.clear(enable: enable)
   end
 
+  # deprecated, use storage.enabled?
   def enabled_in_redis?
     storage.enabled?
   end
