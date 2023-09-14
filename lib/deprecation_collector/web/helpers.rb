@@ -68,7 +68,9 @@ class DeprecationCollector
       end
 
       def test_deprecation?(deprecation)
-        %w[trigger_kwargs_error_warning trigger_rails_deprecation].any? { |method| deprecation[:message]}
+        %w[trigger_kwargs_error_warning trigger_rails_deprecation].any? do
+          |method| deprecation[:message].include?(method)
+        end
       end
 
       def deprecation_tags(deprecation)
