@@ -65,7 +65,10 @@ class DeprecationCollector
         msg = deprecation[:message]
         return :kwargs if msg.include?("Using the last argument as keyword parameters is deprecated") ||
                           msg.include?("Passing the keyword argument as the last hash parameter is deprecated")
-        return :test if msg.include?("trigger_kwargs_error_warning") || msg.include?("trigger_rails_deprecation")
+      end
+
+      def test_deprecation?(deprecation)
+        %w[trigger_kwargs_error_warning trigger_rails_deprecation].any? { |method| deprecation[:message]}
       end
 
       def deprecation_tags(deprecation)
@@ -73,6 +76,7 @@ class DeprecationCollector
         if (detected_tag = detect_tag(deprecation))
           tags << detected_tag
         end
+        tags << :test if test_deprecation?(deprecation)
         tags << deprecation[:realm] if deprecation[:realm] && deprecation[:realm] != "rails"
         tags.merge(deprecation.dig(:notes, :tags) || [])
 
