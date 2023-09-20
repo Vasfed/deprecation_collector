@@ -10,5 +10,6 @@ gem "redis", "~>4.8"
 gem "rack"
 gem "webrick"
 gem "slim"
+gem "bundler", "<2.4"
 
 gemspec path: "../"
