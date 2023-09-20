@@ -24,6 +24,8 @@ class DeprecationCollector
 
       def read_each; end
       def read_one(_digest); [nil] * 4 end
+
+      def import(_dump); end
       # rubocop:enable Style/SingleLineMethods
     end
 

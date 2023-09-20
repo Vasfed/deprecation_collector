@@ -5,10 +5,12 @@ class DeprecationCollector
     # NB: this will not work in tests because of transactions, and may be affected by transactions of the app
     # TODO: use separate db connection to mitigate this
     class ActiveRecord < DeprecationCollector::Storage::Base
-      def initialize(mutex: nil, count: false, write_interval: 900, write_interval_jitter: 60, key_prefix: nil)
+      def initialize(model: nil, mutex: nil, count: false, write_interval: 900, write_interval_jitter: 60,
+                     key_prefix: nil)
         super
         raise "key prefix not supported in AR" if key_prefix && key_prefix != "deprecations"
 
+        self.model = model if model
         @last_write_time = current_time
         @count = count
         @write_interval = write_interval

@@ -24,17 +24,17 @@ class DeprecationCollector
 
       root do # index
         @deprecations = collector_instance.read_each.to_a.compact
-        @deprecations = @deprecations.sort_by { |dep| dep[:message] } unless params[:sort] == "0"
+        @deprecations = @deprecations.sort_by { |dep| dep[:message].to_s } unless params[:sort] == "0"
 
         if params[:reject]
-          @deprecations = @deprecations.reject { |dep| dep[:message].match?(Regexp.union(Array(params[:reject]))) }
+          @deprecations = @deprecations.reject { |dep| dep[:message]&.match?(Regexp.union(Array(params[:reject]))) }
         end
 
         if params[:realm]
-          @deprecations = @deprecations.select { |dep| dep[:realm].match?(Regexp.union(Array(params[:realm]))) }
+          @deprecations = @deprecations.select { |dep| dep[:realm]&.match?(Regexp.union(Array(params[:realm]))) }
         end
 
-        render slim: "index.html"
+        render slim: "index.html", locals: { deprecations: @deprecations }
       end
 
       get "/dump.json" do
@@ -42,12 +42,13 @@ class DeprecationCollector
       end
 
       get "/import" do
-        return "Import not enabled" unless import_enabled?
+        halt 403, "Import not enabled" unless import_enabled?
 
         render slim: "import.html"
       end
 
       post "/import" do
+        halt 403, "Import not enabled" unless import_enabled?
         unless env["CONTENT_TYPE"]&.start_with?("multipart/form-data") && params.dig(:file, :tempfile)
           halt 422, "need multipart json file"
         end

@@ -16,7 +16,7 @@ main
     dt First time
     dd= @deprecation[:first_timestamp]&.yield_self { |time| Time.at(time) }
 
-    - if @deprecation[:count] > 1
+    - if @deprecation[:count]&.>(1)
       dt Count
       dd= @deprecation[:count]
 

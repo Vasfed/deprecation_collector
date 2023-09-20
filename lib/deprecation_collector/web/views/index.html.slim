@@ -27,7 +27,7 @@ main
 
     - total = 0
     - by_realm = Hash.new(0)
-    - @deprecations.each do |deprecation|
+    - deprecations.each do |deprecation|
       - total += 1
       - by_realm[deprecation[:realm]] += 1
       tr data-digest=deprecation[:digest]
@@ -39,9 +39,9 @@ main
 
         td
           ruby:
-            msg = deprecation[:message]
+            msg = deprecation[:message].to_s
             delete_prefixes = Gem.path + [defined?(Rails) && Rails.root.to_s].compact
-            delete_prefixes.each { |path| msg.gsub!(path, '') }
+            delete_prefixes.each { |path| msg = msg.gsub(path, '') }
             msg.delete_prefix! deprecation[:gem_traceline].gsub(/:in .+/, ':') if deprecation[:gem_traceline]
             msg.delete_prefix! deprecation[:app_traceline].gsub(/:in .+/, ':') if deprecation[:app_traceline]
             msg.strip!
