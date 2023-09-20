@@ -14,7 +14,7 @@ class DeprecationCollector
 
       def root_path
         # request.base_url ?
-        "#{env["SCRIPT_NAME"]}/"
+        "#{env['SCRIPT_NAME']}/"
       end
 
       def current_path
@@ -26,7 +26,7 @@ class DeprecationCollector
       end
 
       def deprecation_path(id, format: nil)
-        ["#{root_path}#{id}", format].compact.join('.')
+        ["#{root_path}#{id}", format].compact.join(".")
       end
 
       def enable_deprecations_path

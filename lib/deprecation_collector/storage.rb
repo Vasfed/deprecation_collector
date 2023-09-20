@@ -41,7 +41,7 @@ class DeprecationCollector
       attr_accessor :write_interval, :write_interval_jitter, :redis, :count
 
       def initialize(redis: nil, mutex: nil, count: false, write_interval: 900, write_interval_jitter: 60,
-                            key_prefix: nil)
+                     key_prefix: nil)
         super
         @key_prefix = key_prefix || "deprecations"
         @redis = redis

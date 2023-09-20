@@ -13,6 +13,8 @@ class Deprecation < ActiveRecord::Base; end
 class WrongTable < ActiveRecord::Base; end
 
 RSpec.describe "DeprecationCollector::Storage::ActiveRecord" do
+  subject(:storage) { collector.storage }
+
   before(:context) do
     ActiveRecord::Base.establish_connection(adapter: "sqlite3", database: ":memory:")
     # ActiveRecord::Base.logger = Logger.new(STDOUT)
@@ -33,7 +35,7 @@ RSpec.describe "DeprecationCollector::Storage::ActiveRecord" do
     DeprecationCollector.instance_variable_set(:@installed, true) # to skip at_exit
     DeprecationCollector.install do |instance|
       # instance.storage = DeprecationCollector::Storage::ActiveRecord.new(model: ::Deprecation)
-      instance.model = ::Deprecation
+      instance.model = ::Deprecation # rubocop:disable Style/RedundantConstantBase
       # instance.app_revision = "somerevisionabc123"
       instance.app_root = File.expand_path("..", __dir__)
     end
@@ -41,7 +43,6 @@ RSpec.describe "DeprecationCollector::Storage::ActiveRecord" do
 
   let(:collector) { DeprecationCollector.instance }
   let(:model) { Deprecation }
-  subject(:storage) { collector.storage }
 
   before do
     storage.flush(force: true)

@@ -54,7 +54,7 @@ class DeprecationCollector
           return [
             404,
             { "content-type" => "text/plain", "x-cascade" => "pass" },
-            ["Not Found #{env["REQUEST_METHOD"].inspect} #{env[PATH_INFO].inspect}"]
+            ["Not Found #{env['REQUEST_METHOD'].inspect} #{env[PATH_INFO].inspect}"]
           ]
         end
 
@@ -178,7 +178,7 @@ class DeprecationCollector
 
         def render_template(template, &block)
           template_target = template.gsub(/\.slim\z/, ".template.rb")
-          template_method_name = "_template_#{template_target.gsub(/[^\w]/, "_")}"
+          template_method_name = "_template_#{template_target.gsub(/[^\w]/, '_')}"
           template_filename = File.join(VIEW_PATH, template_target.to_s)
 
           if ENV["DEPRECATION_COLLECTOR_RELOAD_WEB_TEMPLATES"]

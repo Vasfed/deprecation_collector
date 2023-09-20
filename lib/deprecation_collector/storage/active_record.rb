@@ -26,6 +26,7 @@ class DeprecationCollector
         unless expected_class_methods.all? { |method_name| model.respond_to?(method_name) }
           raise ArgumentError, "model expected to be a AR-like class responding to #{expected_class_methods.join(', ')}"
         end
+
         expected_fields = %w[digest data notes created_at updated_at]
         unless expected_fields.all? { |column_name| model.column_names.include?(column_name) }
           raise ArgumentError, "model expected to be a AR-like class with fields #{expected_fields.join(', ')}"
@@ -110,15 +111,15 @@ class DeprecationCollector
       end
 
       def read_one(digest)
-        return [nil]*4 unless (record = model.find_by(digest: digest))
+        return [nil] * 4 unless (record = model.find_by(digest: digest))
 
         [record.digest, record.data.to_json, record.data&.dig("count"), record.notes]
       end
 
       def import(dump_hash)
         attrs = dump_hash.map do |key, deprecation|
-          time = (deprecation["first_timestamp"] || deprecation[:first_timestamp])&.then { |tme| timestamp_to_time(tme) } ||
-                 current_time
+          time = deprecation["first_timestamp"] || deprecation[:first_timestamp]
+          time = time&.then { |tme| timestamp_to_time(tme) } || current_time
           { digest: key, data: deprecation, created_at: time, updated_at: time }
         end
         model.upsert_all(attrs, unique_by: :digest) # , update_only: %i[data updated_at])

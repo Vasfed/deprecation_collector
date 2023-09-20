@@ -9,11 +9,11 @@ RSpec.describe DeprecationCollector do
   let(:backtrace) { caller_locations }
   let(:redis) { described_class.instance.storage.redis }
 
-  before(:context) do # rubocop:disable RSpec/BeforeAfterAll
+  before(:context) do
     $redis ||= Redis.new # rubocop:disable Style/GlobalVars
     described_class.instance_variable_set(:@instance, nil)
     described_class.instance_variable_set(:@installed, false)
-    DeprecationCollector.install do |instance|
+    described_class.install do |instance|
       instance.redis = $redis # rubocop:disable Style/GlobalVars
       instance.app_revision = "somerevisionabc123"
       instance.app_root = File.expand_path("..", __dir__)

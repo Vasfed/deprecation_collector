@@ -16,19 +16,22 @@ Style/StringLiterals:
   Enabled: true
   EnforcedStyle: double_quotes
 
-Style/StringLiteralsInInterpolation:
-  Enabled: true
-  EnforcedStyle: double_quotes
+# Style/StringLiteralsInInterpolation:
+  # Enabled: true
+#  EnforcedStyle: double_quotes
 
 Layout/LineLength:
   Max: 120
 
 Metrics/ClassLength: { Max: 230 }
-Metrics/MethodLength: { Max: 15 }
-Metrics/AbcSize: { Max: 23 }
+Metrics/MethodLength: { Max: 22 }
+Metrics/AbcSize: { Max: 24 }
 Metrics/CyclomaticComplexity: { Max: 9 }
 Metrics/PerceivedComplexity: { Max: 9 }
+Metrics/ParameterLists: { CountKeywordArgs: false }
 
 RSpec/ExampleLength: { Enabled: false }
 RSpec/MultipleExpectations: { Enabled: false }
 RSpec/MessageSpies: { Enabled: false }
+RSpec/BeforeAfterAll: { Enabled: false }
+RSpec/StubbedMock: { Enabled: false }

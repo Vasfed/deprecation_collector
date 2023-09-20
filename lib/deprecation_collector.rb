@@ -84,6 +84,7 @@ class DeprecationCollector
 
   def redis=(val)
     raise ArgumentError, "redis should not be nil" unless val
+
     self.storage = DeprecationCollector::Storage::Redis unless storage.respond_to?(:redis=)
     storage.redis = val
   end
@@ -119,7 +120,10 @@ class DeprecationCollector
   end
 
   def storage=(val)
-    return @storage = val unless val.is_a?(Class)
+    unless val.is_a?(Class)
+      @storage = val
+      return
+    end
 
     @storage = val.new(mutex: @instance_mutex, count: count,
                        write_interval: write_interval, write_interval_jitter: write_interval_jitter,
