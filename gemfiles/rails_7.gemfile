@@ -11,5 +11,6 @@ gem "rack"
 gem "webrick"
 gem "slim"
 gem "rails", "~>7.0"
+gem "sqlite3"
 
 gemspec path: "../"

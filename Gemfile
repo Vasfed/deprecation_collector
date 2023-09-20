@@ -20,6 +20,7 @@ unless defined?(Appraisal)
   end
 
   gem "rails", "~>6.0.0"
+  gem "sqlite3"
   gem "simplecov"
 end
 

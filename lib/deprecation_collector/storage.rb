@@ -21,6 +21,9 @@ class DeprecationCollector
       def flush(**); end
 
       def store(_deprecation); raise("Not implemented"); end
+
+      def read_each; end
+      def read_one(_digest); [nil] * 4 end
       # rubocop:enable Style/SingleLineMethods
     end
 

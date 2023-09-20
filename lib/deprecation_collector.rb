@@ -88,6 +88,12 @@ class DeprecationCollector
     storage.redis = val
   end
 
+  def model=(val)
+    require "deprecation_collector/storage/active_record" unless defined?(DeprecationCollector::Storage::ActiveRecord)
+    self.storage = DeprecationCollector::Storage::ActiveRecord
+    storage.model = val
+  end
+
   def count=(val)
     storage.count = val if storage.respond_to?(:count=)
     @count = val

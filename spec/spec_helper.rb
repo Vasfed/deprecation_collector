@@ -39,15 +39,13 @@ RSpec.configure do |config|
     c.syntax = :expect
   end
 
-  config.before(:all) do # rubocop:disable RSpec/BeforeAfterAll
-    # this is run before each spec file
-    $redis ||= Redis.new # rubocop:disable Style/GlobalVars
+  config.before(:all) do
+    DeprecationCollector.instance_variable_set(:@instance, nil)
+    DeprecationCollector.instance_variable_set(:@installed, true) # to skip at_exit
     DeprecationCollector.install do |instance|
-      instance.redis = $redis # rubocop:disable Style/GlobalVars
+      instance.storage = DeprecationCollector::Storage::StdErr
       instance.app_revision = "somerevisionabc123"
       instance.app_root = File.expand_path("..", __dir__)
-      instance.count = false
-      instance.save_full_backtrace = true
     end
   end
 end
