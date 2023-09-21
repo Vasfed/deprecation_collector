@@ -119,7 +119,7 @@ class DeprecationCollector
       def import(dump_hash)
         attrs = dump_hash.map do |key, deprecation|
           time = deprecation["first_timestamp"] || deprecation[:first_timestamp]
-          time = time&.then { |tme| timestamp_to_time(tme) } || current_time
+          time = time&.yield_self { |tme| timestamp_to_time(tme) } || current_time
           { digest: key, data: deprecation, created_at: time, updated_at: time }
         end
         model.upsert_all(attrs, unique_by: :digest) # , update_only: %i[data updated_at])

@@ -49,7 +49,10 @@ RSpec.describe DeprecationCollector::Web do
     context "when DEPRECATION_COLLECTOR_RELOAD_WEB_TEMPLATES" do
       it "compiles" do
         require "temple/utils"
-        allow(ENV).to receive(:[]).with("DEPRECATION_COLLECTOR_RELOAD_WEB_TEMPLATES").and_return("1")
+
+        allow_any_instance_of(DeprecationCollector::Web::Router::ActionContext).to(
+          receive(:_recompile_enabled?).and_return(true)
+        )
         allow_any_instance_of(DeprecationCollector::Web::Router::ActionContext).to( # rubocop:disable RSpec/AnyInstance
           receive(:puts).with(a_string_matching(/Recompiling/))
         )

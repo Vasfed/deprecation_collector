@@ -18,14 +18,7 @@ Gem::Specification.new do |spec|
   spec.metadata["source_code_uri"] = "https://github.com/Vasfed/deprecation_collector"
   spec.metadata["changelog_uri"] = "https://github.com/Vasfed/deprecation_collector/blob/main/CHANGELOG.md"
 
-  # Specify which files should be added to the gem when it is released.
-  # The `git ls-files -z` loads the files in the RubyGem that have been added into git.
-  spec.files = Dir.chdir(File.expand_path(__dir__)) do
-    `git ls-files -z`.split("\x0").reject do |f|
-      (f == __FILE__) || f.match(%r{\A(?:(?:bin|test|spec|features)/|\.(?:git|travis|circleci)|appveyor)}) ||
-        f.match(%r{\Alib/deprecation_collector/web/views/.+\.slim\z})
-    end
-  end + Dir["lib/deprecation_collector/web/views/*.slim"].map { |template| template.sub(/\.slim\z/, ".template.rb") }
+  spec.files = Dir['lib/**/*', 'sig/**/*', '*.md', '*.txt', '*.gemspec'].select { |f| File.file?(f) }
   spec.require_paths = ["lib"]
 
   spec.add_dependency "redis", ">= 3.0"

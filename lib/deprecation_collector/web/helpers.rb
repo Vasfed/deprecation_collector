@@ -82,13 +82,13 @@ class DeprecationCollector
         tags << deprecation[:realm] if deprecation[:realm] && deprecation[:realm] != "rails"
         tags.merge(deprecation.dig(:notes, :tags) || [])
 
-        tags.to_h do |tag|
+        tags.map do |tag|
           if tag == :test
             [tag, "bg-success"]
           else
             [tag, "bg-secondary"]
           end
-        end
+        end.to_h
       end
     end
   end

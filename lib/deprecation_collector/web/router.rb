@@ -181,9 +181,7 @@ class DeprecationCollector
           template_method_name = "_template_#{template_target.gsub(/[^\w]/, '_')}"
           template_filename = File.join(VIEW_PATH, template_target.to_s)
 
-          if ENV["DEPRECATION_COLLECTOR_RELOAD_WEB_TEMPLATES"]
-            _recompile_template(template, template_filename, template_method_name)
-          end
+          _recompile_template(template, template_filename, template_method_name) if _recompile_enabled?
 
           _load_template(template_filename, template_method_name) unless respond_to?(template_method_name)
 
@@ -200,6 +198,10 @@ class DeprecationCollector
             end
           RUBY
           ActionContext.class_eval(src, template_filename.gsub(/\.template\.rb\z/, ".slim"), 1)
+        end
+
+        def _recompile_enabled?
+          ENV["DEPRECATION_COLLECTOR_RELOAD_WEB_TEMPLATES"]
         end
 
         def _recompile_template(template, template_filename, template_method_name)
