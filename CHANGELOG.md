@@ -1,3 +1,8 @@
+== 0.6.0
+- added active_record storage
+- redis dependency will become optional in v1.0
+- more test coverage
+
 == 0.5.0
 - more work on ui
 - refactored to separate deprecations storage from other logic
