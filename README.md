@@ -55,6 +55,16 @@ Rails.application.routes.draw do
 end
 ```
 
+usually it's a good idea to secure the ui in some way, you can use rails route constraint (actual check will depend on your app):
+```ruby
+Rails.application.routes.draw do
+  constraints(->(request) { request.session[:admin] }) do
+    require 'deprecation_collector/web'
+    mount DeprecationCollector::Web => '/deprecations', as: :deprecations
+  end
+end
+```
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
