@@ -68,6 +68,8 @@ class DeprecationCollector
         msg = deprecation[:message].to_s
         return :kwargs if msg.include?("Using the last argument as keyword parameters is deprecated") ||
                           msg.include?("Passing the keyword argument as the last hash parameter is deprecated")
+
+        nil
       end
 
       def test_deprecation?(deprecation)

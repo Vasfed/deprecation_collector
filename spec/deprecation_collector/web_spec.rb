@@ -63,15 +63,13 @@ RSpec.describe DeprecationCollector::Web do
 
     context "when disabled" do
       it "shows enable" do
-        allow(collector.storage).to receive(:support_disabling?).and_return(true)
-        allow(collector.storage).to receive(:enabled?).and_return(false)
+        allow(collector.storage).to receive_messages(support_disabling?: true, enabled?: false)
         get "/"
         expect(last_response.body).to include("/enable")
       end
 
       it "shows disable" do
-        allow(collector.storage).to receive(:support_disabling?).and_return(true)
-        allow(collector.storage).to receive(:enabled?).and_return(true)
+        allow(collector.storage).to receive_messages(support_disabling?: true, enabled?: true)
         get "/"
         expect(last_response.body).to include("/disable")
         expect(last_response.body).not_to include("/enable")
