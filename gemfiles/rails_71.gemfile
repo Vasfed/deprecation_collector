@@ -11,6 +11,7 @@ gem "redis", "~>4.8"
 gem "rack"
 gem "webrick"
 gem "slim"
-gem "bundler", "<2.4"
+gem "rails", "~>7.1.1"
+gem "sqlite3"
 
 gemspec path: "../"

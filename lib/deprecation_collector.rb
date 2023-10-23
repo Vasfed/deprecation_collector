@@ -44,9 +44,9 @@ class DeprecationCollector
 
       yield instance if block_given?
       instance.fetch_known_digests
-
-      install_collectors
     end
+
+    install_collectors
 
     @instance
   end

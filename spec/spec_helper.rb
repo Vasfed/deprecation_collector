@@ -10,6 +10,9 @@ end
 begin
   require "rails"
   require "active_support"
+
+  class DummyApp < Rails::Application
+  end
 rescue LoadError
   puts "No rails"
 end
@@ -22,6 +25,12 @@ if ENV["COVERAGE"]
     # add_group "Tests", "spec"
     add_filter "spec"
   end
+end
+
+begin
+  require "pry-byebug"
+rescue LoadError
+  # ignore in CI
 end
 
 require "deprecation_collector"

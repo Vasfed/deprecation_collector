@@ -63,15 +63,13 @@ RSpec.describe DeprecationCollector::Web do
 
     context "when disabled" do
       it "shows enable" do
-        allow(collector.storage).to receive(:support_disabling?).and_return(true)
-        allow(collector.storage).to receive(:enabled?).and_return(false)
+        allow(collector.storage).to receive_messages(support_disabling?: true, enabled?: false)
         get "/"
         expect(last_response.body).to include("/enable")
       end
 
       it "shows disable" do
-        allow(collector.storage).to receive(:support_disabling?).and_return(true)
-        allow(collector.storage).to receive(:enabled?).and_return(true)
+        allow(collector.storage).to receive_messages(support_disabling?: true, enabled?: true)
         get "/"
         expect(last_response.body).to include("/disable")
         expect(last_response.body).not_to include("/enable")
@@ -139,7 +137,13 @@ RSpec.describe DeprecationCollector::Web do
   end
 
   it "trigger" do
-    expect(ActiveSupport::Deprecation).to receive(:warn).with(a_string_matching(/Test/)) if defined?(ActiveSupport)
+    if defined?(ActiveSupport)
+      if Rails.gem_version >= "7.1"
+        expect_any_instance_of(ActiveSupport::Deprecation).to receive(:warn).with(a_string_matching(/Test/))
+      else
+        expect(ActiveSupport::Deprecation).to receive(:warn).with(a_string_matching(/Test/))
+      end
+    end
     expect($stderr).to receive(:puts).with(a_string_matching(/Test/))
     post "/trigger"
     expect(last_response.status).to eq(302)

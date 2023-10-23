@@ -12,6 +12,13 @@ appraise "rails_6" do
 end
 
 appraise "rails_7" do
-  gem "rails", "~>7.0"
+  gem "rails", "~>7.0.8"
   gem "sqlite3"
 end
+
+appraise "rails_71" do
+  gem "rails", "~>7.1.1"
+  gem "sqlite3"
+end
+
+# NB: after adding appraisals do `appraisal bundle lock --add-platform x86_64-linux` for CI

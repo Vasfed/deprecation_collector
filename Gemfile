@@ -7,10 +7,13 @@ gemspec
 
 gem "rake", "~> 13.0"
 
+gem "rack-test"
 gem "rspec", "~> 3.0"
 gem "timecop"
 
 unless defined?(Appraisal)
+  gem "appraisal"
+
   group :lint do
     gem "rubocop", "~> 1.21"
     gem "rubocop-performance"
@@ -19,9 +22,12 @@ unless defined?(Appraisal)
     gem "rubocop-rspec"
   end
 
-  gem "rails", "~>6.0.0"
+  gem "rails", "~>7.1.1"
   gem "simplecov"
   gem "sqlite3"
+
+  gem "pry"
+  gem "pry-byebug"
 end
 
 gem "fakeredis"

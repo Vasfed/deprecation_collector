@@ -172,6 +172,8 @@ class DeprecationCollector
           }
 
           return [status, { "content-type" => "text/html" }.merge(color_scheme_headers), [html.to_s]] if html
+
+          nil
         end
 
         VIEW_PATH = "#{__dir__}/views"

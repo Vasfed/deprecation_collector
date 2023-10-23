@@ -18,10 +18,8 @@ Gem::Specification.new do |spec|
   spec.metadata["source_code_uri"] = "https://github.com/Vasfed/deprecation_collector"
   spec.metadata["changelog_uri"] = "https://github.com/Vasfed/deprecation_collector/blob/main/CHANGELOG.md"
 
-  spec.files = Dir['lib/**/*', 'sig/**/*', '*.md', '*.txt', '*.gemspec'].select { |f| File.file?(f) }
+  spec.files = Dir["lib/**/*", "sig/**/*", "*.md", "*.txt", "*.gemspec"].select { |filename| File.file?(filename) }
   spec.require_paths = ["lib"]
 
   spec.add_dependency "redis", ">= 3.0"
-  spec.add_development_dependency "appraisal"
-  spec.add_development_dependency "rack-test"
 end
