@@ -1,3 +1,7 @@
+== 0.7.0
+- support for Rails 7.1
+- make install critical section smaller to prevent installation deprecations preventing installation
+
 == 0.6.0
 - added active_record storage
 - redis dependency will become optional in v1.0
