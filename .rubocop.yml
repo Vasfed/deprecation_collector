@@ -35,3 +35,6 @@ RSpec/MultipleExpectations: { Enabled: false }
 RSpec/MessageSpies: { Enabled: false }
 RSpec/BeforeAfterAll: { Enabled: false }
 RSpec/StubbedMock: { Enabled: false }
+RSpec/NestedGroups: { Max: 4 }
+
+Style/Lambda: { Enabled: false }

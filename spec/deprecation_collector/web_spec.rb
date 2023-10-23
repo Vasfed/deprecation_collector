@@ -139,7 +139,13 @@ RSpec.describe DeprecationCollector::Web do
   end
 
   it "trigger" do
-    expect(ActiveSupport::Deprecation).to receive(:warn).with(a_string_matching(/Test/)) if defined?(ActiveSupport)
+    if defined?(ActiveSupport)
+      if Rails.gem_version >= "7.1"
+        expect_any_instance_of(ActiveSupport::Deprecation).to receive(:warn).with(a_string_matching(/Test/))
+      else
+        expect(ActiveSupport::Deprecation).to receive(:warn).with(a_string_matching(/Test/))
+      end
+    end
     expect($stderr).to receive(:puts).with(a_string_matching(/Test/))
     post "/trigger"
     expect(last_response.status).to eq(302)

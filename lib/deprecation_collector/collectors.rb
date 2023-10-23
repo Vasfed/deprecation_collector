@@ -2,6 +2,27 @@
 
 # :nodoc:
 class DeprecationCollector
+  ACTIVE_SUPPORT_BEHAVIORS = {
+    rails71: ->(message, callstack, deprecator) do
+      # TODO: use deprecator.gem_name, deprecator.deprecation_horizon
+      DeprecationCollector.collect(message, callstack, :rails)
+      ActiveSupport::Deprecation::DEFAULT_BEHAVIORS[stock_activesupport_behavior].call(message, callstack, deprecator)
+    end,
+    legacy: ->(message, callstack, deprecation_horizon, gem_name) do
+      DeprecationCollector.collect(message, callstack, :rails)
+      ActiveSupport::Deprecation::DEFAULT_BEHAVIORS[stock_activesupport_behavior].call(
+        message, callstack, deprecation_horizon, gem_name
+      )
+    end
+  }.freeze
+
+  # for intercepting deprecations from deprecators not installed in Rails.application.deprecators
+  module ActiveSupportDeprecationCollectionPatch
+    def behavior
+      @behavior ||= [DeprecationCollector::ACTIVE_SUPPORT_BEHAVIORS[:rails71]]
+    end
+  end
+
   class << self
     protected
 
@@ -18,12 +39,17 @@ class DeprecationCollector
 
     def tap_activesupport
       # TODO: a more polite hook
-      ActiveSupport::Deprecation.behavior = lambda do |message, callstack, deprecation_horizon, gem_name|
-        # not polite to turn off all other possible behaviors, but otherwise may get duplicate calls
-        DeprecationCollector.collect(message, callstack, :rails)
-        ActiveSupport::Deprecation::DEFAULT_BEHAVIORS[stock_activesupport_behavior].call(
-          message, callstack, deprecation_horizon, gem_name
-        )
+      # not polite to turn off all other possible behaviors, but otherwise may get duplicate calls
+      if Rails.respond_to?(:gem_version) && Rails.gem_version >= "7.1"
+        Rails.application.deprecators.behavior = ACTIVE_SUPPORT_BEHAVIORS[:rails71] if Rails.application&.deprecators
+        # Rails.application.deprecators.behavior only captures new-style deprecations, but we need all:
+        if ActiveSupport::Deprecation.respond_to?(:_instance)
+          ActiveSupport::Deprecation._instance.behavior = ACTIVE_SUPPORT_BEHAVIORS[:rails71]
+        end
+        # collect deprecations from deprecators that are not installed in `Rails.application.deprecators`
+        ActiveSupport::Deprecation.prepend(ActiveSupportDeprecationCollectionPatch)
+      else
+        ActiveSupport::Deprecation.behavior = ACTIVE_SUPPORT_BEHAVIORS[:legacy]
       end
     end
 

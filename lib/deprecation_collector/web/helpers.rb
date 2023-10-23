@@ -50,7 +50,10 @@ class DeprecationCollector
       def trigger_rails_deprecation
         return unless defined?(ActiveSupport::Deprecation)
 
-        -> { ActiveSupport::Deprecation.warn("Test deprecation") } []
+        deprecator = ActiveSupport::Deprecation
+        deprecator = ActiveSupport::Deprecation.new("0.0", "deprecation_collector") if Rails.gem_version >= "7.1"
+
+        -> { deprecator.warn("Test deprecation") } []
       end
 
       def current_color_theme

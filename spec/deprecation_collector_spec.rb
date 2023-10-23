@@ -91,36 +91,98 @@ RSpec.describe DeprecationCollector do
       end
     end
 
-    it "from activesupport" do
-      skip "testing without ActiveSupport" unless defined? ActiveSupport
+    describe "activesupport" do
+      let(:deprecator) do
+        if Rails.gem_version >= "7.1"
+          ActiveSupport::Deprecation._instance
+        else
+          ActiveSupport::Deprecation
+        end
+      end
+      let(:trigger_deprecation) do
+        allow(described_class).to receive(:stock_activesupport_behavior).and_return(:raise)
+        lambda do
+          deprecator.warn("Test deprecation")
+        rescue ActiveSupport::DeprecationException
+          # when stock_activesupport_behavior is raise we are here
+        end
+      end
 
-      expect do
-        # typically is set up in #install on app startup
-        collector.context_saver { { some: "context" } }
-      end.to change(collector, :context_saver)
+      before do
+        skip "testing without ActiveSupport" unless defined? ActiveSupport
+      end
 
-      expect(described_class.send(:stock_activesupport_behavior)).to be_a(Symbol)
-      allow(described_class).to receive(:stock_activesupport_behavior).and_return(:raise)
-      expect do
-        app_code = proc { ActiveSupport::Deprecation.warn("Test deprecation") }
-        app_code[]
-      rescue ActiveSupport::DeprecationException
-        # в тестах это нормально
-      end.to change(collector, :unsent_data?).from(false).to(true)
+      it "stock_activesupport_behavior is symbol" do
+        expect(described_class.send(:stock_activesupport_behavior)).to be_a(Symbol)
+      end
 
-      collector.write_to_redis(force: true)
-      item = collector.read_each.first
-      expect(item).to include(
-        message: include(
-          "DEPRECATION WARNING: Test deprecation (called from block (4 levels) in <top (required)> at " \
-          "spec/deprecation_collector_spec.rb:"
-        ),
-        realm: "rails"
-      )
-      expect(item[:gem_traceline]).to be_nil
-      expect(collector.context_saver).to be_present
-      expect(item[:context]).to eq({ some: "context" })
-      expect(item).not_to have_key(:gem_traceline)
+      it "from activesupport" do
+        expect do
+          # typically is set up in #install on app startup
+          collector.context_saver { { some: "context" } }
+        end.to change(collector, :context_saver)
+
+        expect { trigger_deprecation[] }.to change(collector, :unsent_data?).from(false).to(true)
+
+        collector.write_to_redis(force: true)
+        item = collector.read_each.first
+        expect(item).to include(
+          message: include(
+            "DEPRECATION WARNING: Test deprecation (called from block (5 levels) in <top (required)> at " \
+            "spec/deprecation_collector_spec.rb:"
+          ),
+          realm: "rails"
+        )
+        expect(item[:gem_traceline]).to be_nil
+        expect(collector.context_saver).to be_present
+        expect(item[:context]).to eq({ some: "context" })
+        expect(item).not_to have_key(:gem_traceline)
+      end
+
+      context "when rails 7.1 deprecator installed" do
+        let(:deprecator) do
+          ActiveSupport::Deprecation.new("0.0", "deprecation_collector").tap do |dep|
+            Rails.application.deprecators[:deprecation_collector] = dep
+          end
+        end
+
+        it "also collects" do
+          skip unless Rails.gem_version >= "7.1"
+
+          expect { trigger_deprecation[] }.to change(collector, :unsent_data?).from(false).to(true)
+
+          collector.write_to_redis(force: true)
+          item = collector.read_each.first
+          expect(item).to include(
+            message: include(
+              "DEPRECATION WARNING: Test deprecation (called from block (6 levels) in <top (required)> at " \
+              "spec/deprecation_collector_spec.rb:"
+            ),
+            realm: "rails"
+          )
+        end
+      end
+
+      context "when rails 7.1 deprecator NOT installed" do
+        let(:deprecator) do
+          ActiveSupport::Deprecation.new("0.0", "deprecation_collector")
+        end
+
+        it "also collects" do
+          skip unless Rails.gem_version >= "7.1"
+          expect { trigger_deprecation[] }.to change(collector, :unsent_data?).from(false).to(true)
+
+          collector.write_to_redis(force: true)
+          item = collector.read_each.first
+          expect(item).to include(
+            message: include(
+              "DEPRECATION WARNING: Test deprecation (called from block (6 levels) in <top (required)> at " \
+              "spec/deprecation_collector_spec.rb:"
+            ),
+            realm: "rails"
+          )
+        end
+      end
     end
 
     describe "WarningCollector" do

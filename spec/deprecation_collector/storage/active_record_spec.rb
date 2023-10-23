@@ -18,6 +18,7 @@ RSpec.describe "DeprecationCollector::Storage::ActiveRecord" do
   before(:context) do
     ActiveRecord::Base.establish_connection(adapter: "sqlite3", database: ":memory:")
     # ActiveRecord::Base.logger = Logger.new(STDOUT)
+    ActiveRecord::Migration.verbose = false # disable migration logs
     ActiveRecord::Schema.define do
       create_table :deprecations, force: true do |t|
         t.string :digest, null: false

@@ -11,6 +11,7 @@ jobs:
           - rails_none
           - rails_6
           - rails_7
+          - rails_71
         include:
           - ruby-version: 2.5.9
             appraisal: rails_none
