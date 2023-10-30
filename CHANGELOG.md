@@ -1,3 +1,6 @@
+== 0.7.1
+- fix ruby 2.7 on rails 7.1
+
 == 0.7.0
 - support for Rails 7.1
 - make install critical section smaller to prevent installation deprecations preventing installation

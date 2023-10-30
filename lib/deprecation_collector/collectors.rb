@@ -40,7 +40,7 @@ class DeprecationCollector
     def tap_activesupport
       # TODO: a more polite hook
       # not polite to turn off all other possible behaviors, but otherwise may get duplicate calls
-      if Rails.respond_to?(:gem_version) && Rails.gem_version >= "7.1"
+      if Rails.respond_to?(:gem_version) && Rails.gem_version >= Gem::Version.new("7.1")
         Rails.application.deprecators.behavior = ACTIVE_SUPPORT_BEHAVIORS[:rails71] if Rails.application&.deprecators
         # Rails.application.deprecators.behavior only captures new-style deprecations, but we need all:
         if ActiveSupport::Deprecation.respond_to?(:_instance)

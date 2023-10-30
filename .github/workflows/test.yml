@@ -13,6 +13,8 @@ jobs:
           - rails_7
           - rails_71
         include:
+          - ruby-version: 2.7.8
+            appraisal: rails_71
           - ruby-version: 2.5.9
             appraisal: rails_none
     env:

@@ -51,7 +51,7 @@ class DeprecationCollector
         return unless defined?(ActiveSupport::Deprecation)
 
         deprecator = ActiveSupport::Deprecation
-        deprecator = ActiveSupport::Deprecation.new("0.0", "deprecation_collector") if Rails.gem_version >= "7.1"
+        deprecator = ActiveSupport::Deprecation.new("0.0", "deprecation_collector") if Rails.gem_version >= Gem::Version.new("7.1")
 
         -> { deprecator.warn("Test deprecation") } []
       end

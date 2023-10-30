@@ -93,7 +93,7 @@ RSpec.describe DeprecationCollector do
 
     describe "activesupport" do
       let(:deprecator) do
-        if Rails.gem_version >= "7.1"
+        if Rails.gem_version >= Gem::Version.new("7.1")
           ActiveSupport::Deprecation._instance
         else
           ActiveSupport::Deprecation
@@ -147,7 +147,7 @@ RSpec.describe DeprecationCollector do
         end
 
         it "also collects" do
-          skip unless Rails.gem_version >= "7.1"
+          skip unless Rails.gem_version >= Gem::Version.new("7.1")
 
           expect { trigger_deprecation[] }.to change(collector, :unsent_data?).from(false).to(true)
 
@@ -169,7 +169,7 @@ RSpec.describe DeprecationCollector do
         end
 
         it "also collects" do
-          skip unless Rails.gem_version >= "7.1"
+          skip unless Rails.gem_version >= Gem::Version.new("7.1")
           expect { trigger_deprecation[] }.to change(collector, :unsent_data?).from(false).to(true)
 
           collector.write_to_redis(force: true)
