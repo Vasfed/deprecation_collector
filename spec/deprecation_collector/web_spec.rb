@@ -138,11 +138,14 @@ RSpec.describe DeprecationCollector::Web do
 
   it "trigger" do
     if defined?(ActiveSupport)
-      if Rails.gem_version >= "7.1"
+      if Rails.gem_version >= Gem::Version.new("7.1")
         expect_any_instance_of(ActiveSupport::Deprecation).to receive(:warn).with(a_string_matching(/Test/))
       else
         expect(ActiveSupport::Deprecation).to receive(:warn).with(a_string_matching(/Test/))
       end
+    end
+    if RUBY_VERSION.start_with?("2.7")
+      expect_any_instance_of(DeprecationCollector::Web::Router::ActionContext).to receive(:trigger_kwargs_error_warning)
     end
     expect($stderr).to receive(:puts).with(a_string_matching(/Test/))
     post "/trigger"
