@@ -91,6 +91,18 @@ RSpec.describe DeprecationCollector do
       end
     end
 
+    context "when deprecation in redis.pipelined and need to sync redis" do
+      it "works" do
+        collector.storage.instance_variable_set(:@last_write_time, Time.parse('1986-07-22'))
+        expect(collector.storage).to receive(:flush).and_call_original
+
+        $redis.pipelined do |pipe|
+          # was `undefined method `instance_of?' for <Redis::Future [:hkeys, "deprecations:data"]>:Redis::Future`
+          Kernel.warn("redis deprecation")
+        end
+      end
+    end
+
     describe "activesupport" do
       let(:deprecator) do
         if Rails.gem_version >= Gem::Version.new("7.1")

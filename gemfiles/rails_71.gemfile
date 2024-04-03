@@ -13,5 +13,6 @@ gem "webrick"
 gem "slim"
 gem "rails", "~>7.1.1"
 gem "sqlite3"
+gem "nokogiri", "~>1.15.6"
 
 gemspec path: "../"
