@@ -109,6 +109,8 @@ class DeprecationCollector
 
       def flush(force: false)
         return unless force || (current_time > @last_write_time + @write_interval)
+        # do not disturb existing redis connection if already in pipeline, hope that will be flushed some other time
+        return if in_redis_pipeline?
 
         deprecations_to_flush = nil
         @deprecations_mutex.synchronize do
@@ -182,6 +184,11 @@ class DeprecationCollector
       end
 
       protected
+      def in_redis_pipeline?
+        return false if Gem::Version.new(::Redis::VERSION) >= Gem::Version.new("5.0")
+
+        redis.instance_variable_get(:@client) != redis.instance_variable_get(:@original_client)
+      end
 
       def enabled_flag_key
         @enabled_flag_key ||= "#{@key_prefix}:enabled" # usually deprecations:enabled

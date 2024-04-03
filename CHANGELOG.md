@@ -1,3 +1,6 @@
+== 0.7.2
+- fix error `undefined method instance_of? for Redis::Future` for redis < 5
+
 == 0.7.1
 - fix ruby 2.7 on rails 7.1
 
