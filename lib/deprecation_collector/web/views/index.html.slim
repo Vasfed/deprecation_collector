@@ -64,17 +64,17 @@ main
         td.small
           - if deprecation[:gem_traceline]
             .gem_location
-              - location, function = deprecation[:gem_traceline].split(':in `', 2)
+              - location, function = deprecation[:gem_traceline].split(/:in [`']/, 2)
               - full_gemname = location.delete_prefix('/gems/').gsub(%r{/.*}, '')
               - location_in_gem = location.delete_prefix("/gems/#{full_gemname}/")
               i>= full_gemname
               code.code_location> data-copy-value=location_in_gem = location_in_gem.delete_prefix('lib/')
-              i= function.delete_suffix("'")
+              i= function&.delete_suffix("'")
           - if deprecation[:app_traceline]
             .app_location
-              - location, function = deprecation[:app_traceline].split(':in `', 2)
+              - location, function = deprecation[:app_traceline].split(/:in [`']/, 2)
               code.code_location>= location
-              i= function.delete_suffix("'")
+              i= function&.delete_suffix("'")
         td
           .small.ruby = deprecation[:ruby_version]
           .small.rails = deprecation[:rails_version]

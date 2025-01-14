@@ -66,9 +66,9 @@ RSpec.describe DeprecationCollector do
       expect(item).to include(
         count: 4,
         message: message,
-        app_traceline: %r{^spec/deprecation_collector_spec\.rb:\d+:in `block \(4 levels\) in <top \(required\)>'},
+        app_traceline: %r{^spec/deprecation_collector_spec\.rb:\d+:in [`']block \(4 levels\) in <top \(required\)>'},
         gem_traceline:
-          %r{^/gems/rspec-core-[0-9.]+/lib/rspec/core/memoized_helpers\.rb:\d+:in `block \(2 levels\) in let'},
+          %r{^/gems/rspec-core-[0-9.]+/lib/rspec/core/memoized_helpers\.rb:\d+:in [`']block \(2 levels\) in .*let'},
         ruby_version: RUBY_VERSION
       )
       expect(item).to include(rails_version: Rails.version) if defined?(Rails)
@@ -209,7 +209,7 @@ RSpec.describe DeprecationCollector do
         expect(item).to include(
           message: include("Test warning"),
           realm: "warning",
-          app_traceline: %r{^spec/deprecation_collector_spec\.rb:\d+:in `block \(5 levels\) in <top \(required\)>'}
+          app_traceline: %r{^spec/deprecation_collector_spec\.rb:\d+:in [`']block \(5 levels\) in <top \(required\)>'}
         )
         expect(item).not_to have_key(:gem_traceline)
       end
@@ -240,7 +240,7 @@ RSpec.describe DeprecationCollector do
       expect(item).to include(
         message: include("Test warning"),
         realm: "kernel",
-        app_traceline: %r{^spec/deprecation_collector_spec\.rb:\d+:in `block \(4 levels\) in <top \(required\)>'}
+        app_traceline: %r{^spec/deprecation_collector_spec\.rb:\d+:in [`']block \(4 levels\) in <top \(required\)>'}
       )
       expect(item).not_to have_key(:gem_traceline)
     end
