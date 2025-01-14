@@ -1,3 +1,7 @@
+== 0.8.0
+- add ruby 3.4 support
+- stop testing on some old rubies and rails (should still work on these)
+
 == 0.7.2
 - fix error `undefined method instance_of? for Redis::Future` for redis < 5
 
