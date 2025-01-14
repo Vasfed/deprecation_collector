@@ -212,6 +212,7 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
+  bundler (~> 2.6)
   deprecation_collector!
   fakeredis
   rack
@@ -226,4 +227,4 @@ DEPENDENCIES
   webrick
 
 BUNDLED WITH
-   2.3.26
+   2.6.2
