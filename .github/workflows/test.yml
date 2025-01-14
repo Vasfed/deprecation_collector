@@ -6,27 +6,32 @@ jobs:
 
     strategy:
       matrix:
-        ruby-version: [3.2.2]
-        appraisal:
-          - rails_none
-          - rails_6
-          - rails_7
-          - rails_71
+        ruby:
+          - 3.4.1
+        rails:
+          - none
+          - 71
+          - 72
+          - 80
         include:
-          - ruby-version: 2.7.8
-            appraisal: rails_71
-          - ruby-version: 2.5.9
-            appraisal: rails_none
+          - ruby: 2.5.9
+            rails: none
+          # - ruby: 2.7.8
+          #   rails: 6
+          # - ruby: 3.2.6
+          #   rails: 7
+          - ruby: 3.2.6
+            rails: none
     env:
       BUNDLE_WITHOUT: lint
-      BUNDLE_GEMFILE: ${{ github.workspace }}/gemfiles/${{ matrix.appraisal }}.gemfile
+      BUNDLE_GEMFILE: ${{ github.workspace }}/gemfiles/rails_${{ matrix.rails }}.gemfile
 
     steps:
       - uses: actions/checkout@master
       - name: Install ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: ${{ matrix.ruby-version }}
+          ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
 
       - name: Run tests

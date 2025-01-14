@@ -22,8 +22,14 @@ if ENV["COVERAGE"]
   SimpleCov.start do
     add_group("Lib") { |src| !src.filename.include?("lib/deprecation_collector/web") }
     add_group "Web", "lib/deprecation_collector/web"
+    add_group "Views", "lib/deprecation_collector/web/views"
     # add_group "Tests", "spec"
     add_filter "spec"
+
+    enable_coverage :branch
+    if RUBY_VERSION >= '3.3'
+      enable_coverage_for_eval
+    end
   end
 end
 
