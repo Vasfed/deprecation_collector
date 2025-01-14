@@ -25,4 +25,14 @@ appraise "rails_71" do
   gem "nokogiri", "~>1.15.6" # for ruby 2.7
 end
 
+appraise "rails_72" do
+  gem "rails", "~>7.2.1"
+  gem "sqlite3"
+end
+
+appraise "rails_80" do
+  gem "rails", "~>8.0.1"
+  gem "sqlite3"
+end
+
 # NB: after adding appraisals do `appraisal bundle lock --add-platform x86_64-linux` for CI
